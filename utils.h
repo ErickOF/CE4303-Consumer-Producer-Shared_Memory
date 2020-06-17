@@ -21,3 +21,24 @@ typedef struct Buffer
     short flags;
 } buffer_t;
 
+
+// Functions
+/**
+ * This functions generates an unique id.
+ * 
+ * Params:
+ *     const char* s - string used to generate unique id.
+ * 
+ * Returns
+ *     int uid.
+ */
+int generate_uid(const char* s) {
+    int h = 0;
+    const int size = sizeof(s) / sizeof(char);
+
+    for (int i = 0; i < size; i++) {
+        h = 31 * h + *(s + i);
+    }
+
+    return h;
+}

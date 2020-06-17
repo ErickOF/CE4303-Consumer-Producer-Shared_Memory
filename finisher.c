@@ -9,24 +9,24 @@
 #include <sys/shm.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "utils.h"
 
 
 int main() {
     // Test data
-    char* name = "README.md\0";
-    short buffer_size = 1024;
+    char* buffer_name = "Ericks buffer\0";
+
+    int data_name_size = strlen(buffer_name) + 5;
+    char* data_name = (char*) calloc(data_name_size, sizeof(char));
+    strcpy(data_name, buffer_name);
+    strcat(data_name, "_data\0");
+
     short flags = 0644;
 
-    // Returns a key based on path and id.
-    // https://www.mkssoftware.com/docs/man3/ftok.3.asp#:~:text=The%20ftok()%20function%20returns,system%2C%20it%20returns%20different%20keys.
-    key_t key;
-
-    if ((key = ftok(name, BUFFER_ID)) == (key_t) -1) {
-        printf("IPC error: ftok\n");
-        exit(1);
-    }
+    // Generate a key based on buffer name
+    key_t key = (key_t) generate_uid(buffer_name);
 
     // Returns the shared memory identifier associated with key.
     // int shmget(key_t key, size_t size, int shmflg);
@@ -58,6 +58,9 @@ int main() {
     // Detach and destroy shared memory for data
     shmdt(buffer);
     shmctl(shmid, IPC_RMID, NULL);
-     
+
+    // Free memory after be used
+    free(data_name);
+
     return 0; 
-} 
+}
