@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
+#include "lib/shared_memory.h"
 
 
 
@@ -10,7 +10,7 @@ int* parse_initializer(int argc, char *argv[]){
 
     //                      buffer name, buffer size, 
     int valid_arguments[2] =    {0,         0};
-    // [0] is buffer name and [1] is buffer size
+    // [0] is shared memory id and [1] is buffer size
     int* values = (int*)malloc(2 * sizeof(int)); 
     *values = -1;
     *(values + 1) = -1;
@@ -30,8 +30,8 @@ int* parse_initializer(int argc, char *argv[]){
         if(strcmp(argv[i], "-bn") == 0){
             // And we havent recieved it
             if(valid_arguments[0] == 0){
-                // Store it
-                *values = atoi(argv[i+1]);
+                // Get the associated shared memory id
+                *values = get_shared_mem_id(argv[i+1]);
                 valid_arguments[0] = 1;
             }
             else
@@ -73,11 +73,11 @@ int* parse_initializer(int argc, char *argv[]){
 }
 
 
-int* parse_users(int argc, char *argv[]){
+int* parse_producer(int argc, char *argv[]){
 
     //                      buffer name, avg seconds
     int valid_arguments[2] = {0         ,      0};
-    // [0] is buffer name and [1] is avg seconds
+    // [0] is buffer id and [1] is avg seconds
     int* values = (int*)malloc(2 * sizeof(int)); 
     *values = -1;
     *(values + 1) = -1;
@@ -97,8 +97,8 @@ int* parse_users(int argc, char *argv[]){
         if(strcmp(argv[i], "-bn") == 0){
             // And we havent recieved it
             if(valid_arguments[0] == 0){
-                // Store it
-                *values = atoi(argv[i+1]);
+                // Get the associated shared memory id
+                *values = get_shared_mem_id(argv[i+1]);
                 valid_arguments[0] = 1;
             }
             else
@@ -139,13 +139,13 @@ int* parse_users(int argc, char *argv[]){
 
 }
 
-
+// TODO: CONSUMER PARSER 
 
 int* parse_killer(int argc, char *argv[]){
 
     //                      buffer name
     int valid_arguments = 0;
-    // [0] is buffer name 
+    // [0] is buffer id 
     int* values = (int*)malloc(1 * sizeof(int)); 
     *values = -1;
 
@@ -164,8 +164,8 @@ int* parse_killer(int argc, char *argv[]){
         if(strcmp(argv[i], "-bn") == 0){
             // And we havent recieved it
             if(valid_arguments == 0){
-                // Store it
-                *values = atoi(argv[i+1]);
+                // Get the associated shared memory id
+                *values = get_shared_mem_id(argv[i+1]);
                 valid_arguments = 1;
             }
             else
