@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "utils.h"
+#include "lib/shared_memory.h"
 
 
 int main() {
@@ -52,19 +52,20 @@ int main() {
 
     printf("Key: %i, ShmID %i\n", key, shmid);
 
-    // Asking for shared data memory
-    buffer->id_data = shmget(ftok(data_name, BUFFER_ID), buffer_size * sizeof(char), IPC_CREAT | flags);
-    char* data = (char*) shmat(shmid, NULL, 0);
-
     // Set values
-    buffer->flags = flags;
+    // Initialize consumer and producer id values
     buffer->consumers = 0;
     buffer->producers = 0;
+    // Set system active
+    buffer->isActive = 1;
+    // Initialize msg related arrays
+    buffer->available_slots = (short*) calloc(MAX_MSGS, sizeof(short));
+    buffer->msg = (message_t*)malloc(MAX_MSGS * sizeof(message_t));
+
 
     printf("Buffer created: %s\n\n", buffer_name);
 
     // Detach from shared memory
-    shmdt(data);
     shmdt(buffer);
 
     // Free memory after be used
