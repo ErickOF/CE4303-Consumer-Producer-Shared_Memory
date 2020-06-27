@@ -1,8 +1,7 @@
 #ifndef PROYECTO1_SHARED_MEMORY_H
 #define PROYECTO1_SHARED_MEMORY_H
 
-
-
+#include <errno.h>
 // The <sys/ipc.h> header is used by three mechanisms for interprocess
 // communication (IPC): messages, semaphores and shared memory. All use
 // a common structure type, ipc_perm to pass information used in
@@ -15,10 +14,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #include "const.h"
 #include "semaphores.h"
 
+
+extern int errno;
 
 // Types and structures
 
@@ -37,7 +37,6 @@ typedef struct Message
     short data;
     int date;
     int time;
-
 } message_t;
 
 
@@ -58,9 +57,7 @@ typedef struct Buffer
     short isActive;
     short* available_slots;
     message_t* msg;
-
 } buffer_t;
-
 
 
 // Functions
@@ -83,6 +80,8 @@ int generate_uid(const char* s) {
 
     return h;
 }
+
+
 /**
  * This function gets the id of a shred memory location
  * based on a buffer name
@@ -93,19 +92,21 @@ int generate_uid(const char* s) {
  * Returns
  *      int id of the shm.
  */
-int get_shared_mem_id(const char* buffer_name){
-
+int get_shared_mem_id(const char* buffer_name, int flag){
     // Generate a key based on buffer name
     key_t key = (key_t) generate_uid(buffer_name);
     // Returns the shared memory identifier associated with key.
     // int shmget(key_t key, size_t size, int shmflg);
     // https://www.mkssoftware.com/docs/man3/shmget.3.asp
-    int shmid = shmget(key, sizeof(buffer_t), buffer_flags | IPC_CREAT);
+    int shmid = shmget(key, sizeof(buffer_t), buffer_flags | flag);
+
     // Check for errors
-    if (shmid == -1) {
-        printf("***ERROR: shmid is %d ***", shmid);
-        perror("shmget failed"); 
-        exit(EXIT_FAILURE);
+    if (errno == EEXIST) {
+        printf("Error: Buffer '%s' already exist.\n", buffer_name);
+        exit(1);
+    } else if (shmid == -1) {
+        printf("Error: Buffer '%s' doesn't exist.\n", buffer_name);
+        exit(1);
     }
 
     return shmid;
@@ -123,15 +124,15 @@ int get_shared_mem_id(const char* buffer_name){
  *      buffer_t* shared memory buffer structure.
  */
 buffer_t* attach_shm(int shmid){
-
     // Attaches the shared memory segment associated with the shared
     // memory identifier shmid to the data segment of the calling
     // process.
     // https://www.mkssoftware.com/docs/man3/shmat.3.asp
     buffer_t* buffer = (buffer_t*) shmat(shmid, NULL, 0);
+
     // Check for errors
     if ((*(int*)buffer) == -1) {
-        perror("shmat failed"); 
+        printf("Buffer not found.\n"); 
         exit(EXIT_FAILURE);
     }
 
@@ -151,8 +152,6 @@ buffer_t* attach_shm(int shmid){
  *      short* client_id - ptr to the client id
  */
 void start_client(int shmid, int isProducer, buffer_t* buffer, sem_t* semaphores, short* client_id){
-
-
     // Attach the shared memory segment 
     buffer = attach_shm(shmid);
     // Get the semaphores used to access the data
@@ -163,17 +162,18 @@ void start_client(int shmid, int isProducer, buffer_t* buffer, sem_t* semaphores
 
     // Wait for acces to get the client id
     sem_wait(semaphores);
+
     // Check if we have consumer or producer
-    if(isProducer){
+    if (isProducer) {
         // if producer store the id and increase the number of 
         // connected producers
         *client_id = (buffer->producers)++;
-    }
-    else{
+    } else {
         // if consumer store the id and increase the number of 
         // connected consumers
         *client_id = (buffer->consumers)++;
     }
+
     // Free the mutex
     sem_post(semaphores);
 
@@ -211,6 +211,7 @@ int search_target(buffer_t* buffer, int target_value){
 
 }
 
+
 /**
  * This function sends a message through the buffer
  *
@@ -220,18 +221,16 @@ int search_target(buffer_t* buffer, int target_value){
  * 
  */
 void send_msg(message_t msg, buffer_t* buffer){
-
-
     // Search for an empty space in the available slots
     int idx = search_target(buffer, FALSE);
 
     // Check for errors
-    if(idx == -1){
+    if (idx == -1) {
         perror("send msg failed");
         exit(EXIT_FAILURE);
     }  
     // If everything is ok then send the message and print the success notification
-    else{
+    else {
 
         // Extract the ptr to the msg slot
         message_t* slt = (buffer->msg + idx);
@@ -244,27 +243,23 @@ void send_msg(message_t msg, buffer_t* buffer){
         printf("Productores activos: %d", buffer->producers);
         printf("Consumidores activos: %d", buffer->consumers);
         printf("-----------------------------------------------------------\n");
-
-
     }
-    
 }
 
 
 int receive_msg(buffer_t* buffer){
-
     // msg
     message_t* message;
     // Search for an empty space in the available slots
     int idx = search_target(buffer, FALSE);
 
     // Check for errors
-    if(idx == -1){
+    if (idx == -1) {
         perror("send msg failed");
         exit(EXIT_FAILURE);
     }  
     // If everything is ok then send the message and print the success notification
-    else{
+    else {
 
         // Extract the ptr to the msg slot
         message = (buffer->msg + idx);
@@ -279,10 +274,6 @@ int receive_msg(buffer_t* buffer){
     }
 
     return message->data;
-
-
 }
-
-
 
 #endif  // PROYECTO1_SHARED_MEMORY_H

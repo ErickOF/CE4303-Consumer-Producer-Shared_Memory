@@ -8,6 +8,7 @@
 #include <semaphore.h>
 #include "const.h"
 
+
 sem_t* get_semaphores(){
     // Allocate memory
     // semaphores[0]: mutex, semaphores[1]: empty_spaces, semaphores[2]: available_msgs

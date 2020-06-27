@@ -11,32 +11,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "utils.h"
+#include "lib/shared_memory.h"
+#include "lib/argument_parser.h"
 
 
-int main() {
-    // Test data
-    char* buffer_name = "Ericks buffer\0";
-
-    int data_name_size = strlen(buffer_name) + 5;
-    char* data_name = (char*) calloc(data_name_size, sizeof(char));
-    strcpy(data_name, buffer_name);
-    strcat(data_name, "_data\0");
-
-    short flags = 0644;
-
-    // Generate a key based on buffer name
-    key_t key = (key_t) generate_uid(buffer_name);
-
-    // Returns the shared memory identifier associated with key.
-    // int shmget(key_t key, size_t size, int shmflg);
-    // https://www.mkssoftware.com/docs/man3/shmget.3.asp
-    int shmid = shmget(key, sizeof(buffer_t), flags | IPC_CREAT);
-
-    if (shmid == -1) {
-        printf("Error: shmget\n");
-        exit(1);
-    }
+int main(int argc, char *argv[]) {
+    int shmid = *parse_killer(argc, argv);
 
     // Attaches the shared memory segment associated with the shared
     // memory identifier shmid to the data segment of the calling
@@ -49,18 +29,11 @@ int main() {
       exit(1);
     }
 
-    char* data = (char*) shmat(shmid, NULL, 0);
-
-    // Detach and destroy shared memory for data
-    shmdt(data);
-    shmctl(buffer->id_data, IPC_RMID, NULL);
-
-    // Detach and destroy shared memory for data
+    // Detach and destroy shared memory for buffer
     shmdt(buffer);
     shmctl(shmid, IPC_RMID, NULL);
 
-    // Free memory after be used
-    free(data_name);
+    printf("Buffer was deleted.\n");
 
     return 0; 
 }

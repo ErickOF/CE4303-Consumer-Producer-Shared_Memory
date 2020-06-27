@@ -1,7 +1,6 @@
 #ifndef PROYECTO1_CONSUMER_H
 #define PROYECTO1_CONSUMER_H
 
-
 // C program for finding the largest integer 
 // among three numbers using command line arguments 
 #include <stdio.h> 
@@ -9,6 +8,7 @@
 
 #include "lib/argument_parser.h"
 #include "lib/semaphores.h"
+
 
 // Taking argument as command line 
 int main(int argc, char *argv[]) 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     start_client(*parameters, FALSE, buffer, semaphores, &self_id);
 
     // Only send when the buffer is active
-    while(isRecieving){
+    while (isRecieving) {
         // Wait for full spaces
         sem_wait(semaphores + 2);
         // Wait for mutex
@@ -49,18 +49,20 @@ int main(int argc, char *argv[])
         isRecieving = buffer->isActive;
 
         // If it is then send the msg
-        if(isRecieving){
-
+        if (isRecieving) {
             // TODO : BUILD MESSAGES CORRECTLY
             // Create msg
-            message_t msg = {.producer_id=self_id, .data=self_id, 
-                            .date=10, .time=11};
+            message_t msg = {
+                .producer_id=self_id,
+                .data=self_id, 
+                .date=10, .time=11
+            };
             // Send the msg
             send_msg(msg, buffer);
 
         }
         // If the buffer is down 
-        else{
+        else {
             // Decrease the producer counter
             --(buffer->consumers);
             printf("-----------------------------------------------------------\n");
@@ -85,8 +87,5 @@ int main(int argc, char *argv[])
     printf("Detached...\n");
 
 } 
-
-
-
 
 #endif  // PROYECTO1_CONSUMER_H

@@ -7,8 +7,6 @@
 
 #include "shared_memory.h"
 
-
-
 int* parse_initializer(int argc, char *argv[]){
 
     //                      buffer name, buffer size, 
@@ -34,7 +32,7 @@ int* parse_initializer(int argc, char *argv[]){
             // And we havent recieved it
             if(valid_arguments[0] == 0){
                 // Get the associated shared memory id
-                *values = get_shared_mem_id(argv[i+1]);
+                *values = get_shared_mem_id(argv[i+1], IPC_CREAT | IPC_EXCL);
                 valid_arguments[0] = 1;
             }
             else
@@ -101,7 +99,7 @@ int* parse_producer(int argc, char *argv[]){
             // And we havent recieved it
             if(valid_arguments[0] == 0){
                 // Get the associated shared memory id
-                *values = get_shared_mem_id(argv[i+1]);
+                *values = get_shared_mem_id(argv[i+1], 0);
                 valid_arguments[0] = 1;
             }
             else
@@ -169,7 +167,7 @@ int* parse_consumer(int argc, char *argv[]){
             // And we havent recieved it
             if(valid_arguments[0] == 0){
                 // Get the associated shared memory id
-                *values = get_shared_mem_id(argv[i+1]);
+                *values = get_shared_mem_id(argv[i+1], 0);
                 valid_arguments[0] = 1;
             }
             else
@@ -230,8 +228,7 @@ int* parse_consumer(int argc, char *argv[]){
 }
 
 int* parse_killer(int argc, char *argv[]){
-
-    //                      buffer name
+    // buffer name
     int valid_arguments = 0;
     // [0] is buffer id 
     int* values = (int*)malloc(1 * sizeof(int)); 
@@ -240,20 +237,18 @@ int* parse_killer(int argc, char *argv[]){
 	// Checking if number of argument is 
 	// equal to 3 or not. 
     
-	if (argc != 3) 
-	{ 
-		printf("Please enter only the buffer name. \nExample: killer -bn <buffer_name>\n"); 
+	if (argc != 3)  { 
+		printf("Please enter only the buffer name. \nExample: killer -bn <buffer_name>\n");
 		return 0; 
 	} 
 
-    for (int i = 0; i < argc; ++i)
-    {
+    for (int i = 0; i < argc; ++i) {
         // If we recive the buffer name
         if(strcmp(argv[i], "-bn") == 0){
             // And we havent recieved it
             if(valid_arguments == 0){
                 // Get the associated shared memory id
-                *values = get_shared_mem_id(argv[i+1]);
+                *values = get_shared_mem_id(argv[i + 1], 0);
                 valid_arguments = 1;
             }
             else
@@ -266,17 +261,12 @@ int* parse_killer(int argc, char *argv[]){
     }
 
     // Check we read all the values 
-    if(*values == -1){
+    if (*values == -1){
         printf("Missing buffer name\n"); 
         exit(EXIT_FAILURE);
     }
 
     return values;
-
 }
-
-
-
-
 
 #endif  // PROYECTO1_ARGUMENT_PARSER_H
