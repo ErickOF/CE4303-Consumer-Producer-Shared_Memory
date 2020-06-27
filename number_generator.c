@@ -13,9 +13,10 @@ long int POISON_SEED;
 double EXPO_SEED;
 
 double expo_distribution(double lambda){
-    double u, seconds;
+    double u;
     u = rand() / (RAND_MAX + 1.0);
-    EXPO_SEED = (-log(1-u)/lambda);
+    EXPO_SEED = lambda * -log(1.0 - u);
+
     return EXPO_SEED;
 }
 
@@ -41,17 +42,34 @@ RANDTYPE poisson_distribution(double lambda){
 void main(int argc, char**argv){
 //Random number exponential generator 
 	int i;
+
+    float mean = 0;
     srand((unsigned)time(NULL));
-    for (i=0; i<5; i++)
-        printf("segundos expo: %f\n", expo_distribution(0.5));
+
+    printf("segundos expo:");
+
+    for (i=0; i<50; i++) {
+        double value = expo_distribution(7);
+        printf("%f ", value);
+        mean += value;
+    }
+
+    mean = mean / 50;
+    printf("\n%f\n", mean);
     
 
-//Random number Poisson  generator   
+    //Random number Poisson  generator   
     srand((unsigned)time(NULL));
-    POISON_SEED = rand() / (RAND_MAX + 1.0) * 10;
-    for (i=0; i<5; i++){       
-        printf("segundos poisson: %ld\n",poisson_distribution(POISON_SEED));
-        }
+    POISON_SEED = 7;
+    mean = 0;
+    printf("segundos poisson:");
+    for (i=0; i<50; i++){
+        long int value = poisson_distribution(POISON_SEED);
+        mean += value;
+        printf("%ld ", value);
+    }
+    mean = mean / 50;
+    printf("\n%f\n", mean);
 }
 // estan aqui llamados en ciclos para pruebas, la idea es
 //llamarlos cuando lo necesite. los srand solo se ejecutan 

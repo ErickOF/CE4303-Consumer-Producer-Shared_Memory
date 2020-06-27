@@ -62,6 +62,18 @@ typedef struct Buffer
 
 // Functions
 /**
+ * This function return current datetime.
+ * 
+ * Params:
+ *     char date - var to store datetime.
+ */
+void getDate(char date[25]){
+    time_t t = time(NULL);
+    struct tm *tm = localtime(&t);
+    strftime(date, 24, "%Y-%m-%d %H:%M:%S", tm);
+}
+
+/**
  * This functions generates an unique id.
  * 
  * Params:

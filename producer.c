@@ -9,6 +9,8 @@
 
 #include "lib/argument_parser.h"
 #include "lib/semaphores.h"
+#include "lib/random_number_genarator.h"
+
 
 // Taking argument as command line 
 int main(int argc, char *argv[]) 
@@ -35,6 +37,11 @@ int main(int argc, char *argv[])
 
     // Initialize buffer, semaphores and client id
     start_client(*parameters, TRUE, buffer, semaphores, &self_id);
+
+    // Initialize random lib
+    srand((unsigned) time(NULL));
+    // Get random time
+    double time = poisson_distribution(*(parameters + 1));
 
     // Only send when the buffer is active
     while(isSending){
@@ -74,18 +81,12 @@ int main(int argc, char *argv[])
 
         // Sleep time 
         sleep(*(parameters + 1));
-
-
     }
 
     // Detach from shared memory
     shmdt(buffer);
     // TODO HANDLE PRINTS OVER HERE
     printf("Detached...\n");
-
-} 
-
-
-
+}
 
 #endif  // PROYECTO1_PRODUCER_H

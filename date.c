@@ -4,8 +4,7 @@
 void getDate(char date[25]){
 	time_t t = time(NULL);
 	struct tm *tm = localtime(&t);
-    	strftime(date, 24, "%Y-%m-%d %H:%M:%S", tm);
-
+    strftime(date, 24, "%Y-%m-%d %H:%M:%S", tm);
 }
 
 void main(){
@@ -14,5 +13,3 @@ void main(){
 	printf("%s\n", date);	
 		
 }
-
-
