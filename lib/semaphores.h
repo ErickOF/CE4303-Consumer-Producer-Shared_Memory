@@ -1,3 +1,7 @@
+#ifndef PROYECTO1_SEMAPHORES_H
+#define PROYECTO1_SEMAPHORES_H
+
+
 #include <stdlib.h>
 #include <fcntl.h>
 // https://pubs.opengroup.org/onlinepubs/009695399/basedefs/semaphore.h.html
@@ -6,7 +10,7 @@
 
 sem_t* get_semaphores(){
     // Allocate memory
-    // semaphores[0]: available, semaphores[1]: accessing, semaphores[2]: updating
+    // semaphores[0]: mutex, semaphores[1]: empty_spaces, semaphores[2]: available_msgs
     sem_t* semaphores = (sem_t*)malloc(3 * sizeof(sem_t));
     sem_t* aux;
 
@@ -48,3 +52,7 @@ sem_t* get_semaphores(){
     return semaphores;
 
 }
+
+
+
+#endif  // PROYECTO1_SEMAPHORES_H

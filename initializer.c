@@ -1,14 +1,4 @@
-// The <sys/ipc.h> header is used by three mechanisms for interprocess
-// communication (IPC): messages, semaphores and shared memory. All use
-// a common structure type, ipc_perm to pass information used in
-// determining permission to perform an IPC operation.
-// https://pubs.opengroup.org/onlinepubs/007908799/xsh/sysipc.h.html
-#include <sys/ipc.h>
-// XSI shared memory facility.
-// https://pubs.opengroup.org/onlinepubs/009695399/basedefs/sys/shm.h.html
-#include <sys/shm.h>
-#include <stdio.h>
-#include <stdlib.h>
+
 #include <string.h>
 
 #include "lib/shared_memory.h"

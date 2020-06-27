@@ -1,3 +1,6 @@
+#ifndef PROYECTO1_CONST_H
+#define PROYECTO1_CONST_H
+
 /*      BOOLEAN CONSTANTS      */
 #define TRUE 1
 #define FALSE 0
@@ -21,3 +24,5 @@ const char* empty = "empty";
 const char* available = "available";
 // Semaphore flags
 const short semaphore_flags = 0666;
+
+#endif  // PROYECTO1_CONST_H

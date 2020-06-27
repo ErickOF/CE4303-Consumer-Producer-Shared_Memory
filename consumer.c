@@ -1,5 +1,5 @@
-#ifndef PROYECTO1_PRODUCER_H
-#define PROYECTO1_PRODUCER_H
+#ifndef PROYECTO1_CONSUMER_H
+#define PROYECTO1_CONSUMER_H
 
 
 // C program for finding the largest integer 
@@ -14,15 +14,17 @@
 int main(int argc, char *argv[]) 
 { 
     // Get the attachment parametters
-    // [0]:shmid [1]:avg time sleep in seconds
-    int* parameters = parse_producer(argc, argv);
+    // [0]:shmid 
+    // [1]:avg time sleep in seconds 
+    // [2] access mode
+    int* parameters = parse_consumer(argc, argv);
     // Stats variables
     unsigned int num_messages = 0;
     double acc_waiting_time = 0;
     double acc_sem_waiting_time = 0;
-    double acc_kernel_time = 0;
-    // Producer control and identification
-    short isSending = TRUE;
+    double acc_user_time = 0;
+    // Consumer control and identification
+    short isRecieving = TRUE;
     short self_id;
 
     // Shared memory buffer
@@ -34,20 +36,20 @@ int main(int argc, char *argv[])
     sem_t* semaphores;
 
     // Initialize buffer, semaphores and client id
-    start_client(*parameters, TRUE, buffer, semaphores, &self_id);
+    start_client(*parameters, FALSE, buffer, semaphores, &self_id);
 
     // Only send when the buffer is active
-    while(isSending){
-        // Wait for empty spaces
-        sem_wait(semaphores + 1);
+    while(isRecieving){
+        // Wait for full spaces
+        sem_wait(semaphores + 2);
         // Wait for mutex
         sem_wait(semaphores);
 
         //Check if the buffer is still active
-        isSending = buffer->isActive;
+        isRecieving = buffer->isActive;
 
         // If it is then send the msg
-        if(isSending){
+        if(isRecieving){
 
             // TODO : BUILD MESSAGES CORRECTLY
             // Create msg
@@ -55,22 +57,21 @@ int main(int argc, char *argv[])
                             .date=10, .time=11};
             // Send the msg
             send_msg(msg, buffer);
-            // Increment the counter
-            ++num_messages;
 
         }
         // If the buffer is down 
         else{
             // Decrease the producer counter
-            --(buffer->producers);
-            printf("Setected unactive buffer, detaching...\n");
+            --(buffer->consumers);
+            printf("-----------------------------------------------------------\n");
+            printf("Detected inactive buffer, detaching consumer %d\n", self_id);
 
         }
 
         // Release mutex
         sem_post(semaphores);
-        // Update available
-        sem_post(semaphores + 2);
+        // Update new empty space available
+        sem_post(semaphores + 1);
 
         // Sleep time 
         sleep(*(parameters + 1));
@@ -88,4 +89,4 @@ int main(int argc, char *argv[])
 
 
 
-#endif  // PROYECTO1_PRODUCER_H
+#endif  // PROYECTO1_CONSUMER_H
