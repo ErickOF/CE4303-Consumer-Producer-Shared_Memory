@@ -1,58 +1,58 @@
 #ifndef PROYECTO1_ARGUMENT_PARSER_H
 #define PROYECTO1_ARGUMENT_PARSER_H
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "shared_memory.h"
 
-int* parse_initializer(int argc, char *argv[]){
 
-    //                      buffer name, buffer size, 
-    int valid_arguments[2] =    {0,         0};
+int* parse_initializer(int argc, char *argv[]){
+    // buffer name, buffer size, 
+    int valid_arguments[2] = {0, 0};
     // [0] is shared memory id and [1] is buffer size
-    int* values = (int*)malloc(2 * sizeof(int)); 
+    int* values = (int*) malloc(2 * sizeof(int)); 
     *values = -1;
     *(values + 1) = -1;
 
 	// Checking if number of argument is 
 	// equal to 4 or not. 
-    
-	if (argc != 5) 
-	{ 
+	if (argc != 5) { 
 		printf("Please enter only the buffer name and buffer size. \nExample: initializer -bn <buffer_name> -bs <buffer_size>\n"); 
-		return 0; 
+		exit(EXIT_FAILURE); 
 	} 
 
-    for (int i = 0; i < argc; ++i)
-    {
+    for (int i = 0; i < argc; ++i) {
         // If we recive the buffer name
-        if(strcmp(argv[i], "-bn") == 0){
+        if (strcmp(argv[i], "-bn") == 0) {
             // And we havent recieved it
-            if(valid_arguments[0] == 0){
+            if (valid_arguments[0] == 0) {
                 // Get the associated shared memory id
-                *values = get_shared_mem_id(argv[i+1], IPC_CREAT | IPC_EXCL);
+                *values = get_shared_mem_id(argv[i + 1], IPC_CREAT | IPC_EXCL);
                 valid_arguments[0] = 1;
-            }
-            else
-            {
-                printf("Entered buffer name twice\n"); 
+            } else {
+                printf("Entered buffer name twice.\n"); 
                 exit(EXIT_FAILURE);
             }
             
         }
         // If we recive the avg message time
-        else if(strcmp(argv[i], "-bs") == 0){
+        else if(strcmp(argv[i], "-bs") == 0) {
             // And we havent recieved it
-            if(valid_arguments[1] == 0){
-                // Store it
-                *(values + 1) = atoi(argv[i+1]);
-                valid_arguments[1] = 1;
-            }
-            else
-            {
-                printf("Entered buffer size twice\n"); 
+            if (valid_arguments[1] == 0) {
+                if (isdigit(argv[i + 1])) {
+                    // Store it
+                    *(values + 1) = atoi(argv[i + 1]);
+                    valid_arguments[1] = 1;
+                } else {
+                    printf("Buffer size must be a number.\n"); 
+                    exit(EXIT_FAILURE);
+                }
+                
+            } else {
+                printf("Entered buffer size twice.\n"); 
                 exit(EXIT_FAILURE);
             }
             
@@ -60,17 +60,16 @@ int* parse_initializer(int argc, char *argv[]){
     }
 
     // Check we read all the values 
-    if(*values == -1){
+    if (*values == -1) {
         printf("Missing buffer name\n"); 
         exit(EXIT_FAILURE);
     } 
-    if(*(values + 1) == -1){
+    if (*(values + 1) == -1) {
         printf("Missing buffer size\n"); 
         exit(EXIT_FAILURE);
     }
 
     return values;
-
 }
 
 

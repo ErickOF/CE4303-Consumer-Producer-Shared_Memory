@@ -13,6 +13,7 @@
 #include <sys/shm.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "const.h"
 #include "semaphores.h"
