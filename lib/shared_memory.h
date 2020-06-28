@@ -28,14 +28,14 @@ extern int errno;
  * structure.
  * 
  * short producer_id - id of the producer that posted the msg.
- * short data - container for the msg.
+ * int data - container for the msg.
  * int date - sent date of the msg.
  * int time - time the msg was sent.
  */
 typedef struct Message
 {
     short producer_id;
-    short data;
+    int data;
     int date;
     int time;
 } message_t;
@@ -46,6 +46,7 @@ typedef struct Message
  * 
  * short producers - number of producers using the buffer.
  * short consumers - number of consumers using the buffer.
+ * short next_consumer - turn counter for consumer msg reception
  * short isActive - shared memory flag used to control system activity.
  * short available_slots - binary array that indexes available slots in 
  *                         the msg array, has size MAX_MSGS.
@@ -55,6 +56,7 @@ typedef struct Buffer
 {
     short consumers;
     short producers;
+    short next_consumer;
     short isActive;
     short* available_slots;
     message_t* msg;
@@ -136,20 +138,18 @@ int get_shared_mem_id(const char* buffer_name, int flag){
  * Returns
  *      buffer_t* shared memory buffer structure.
  */
-buffer_t* attach_shm(int shmid){
+void attach_shm(int shmid, buffer_t* buffer){
     // Attaches the shared memory segment associated with the shared
     // memory identifier shmid to the data segment of the calling
     // process.
     // https://www.mkssoftware.com/docs/man3/shmat.3.asp
-    buffer_t* buffer = (buffer_t*) shmat(shmid, NULL, 0);
+    *buffer = *(buffer_t*) shmat(shmid, NULL, 0);
 
     // Check for errors
     if ((*(int*)buffer) == -1) {
         printf("Buffer not found.\n"); 
         exit(EXIT_FAILURE);
     }
-
-    return buffer;
 }
 
 
@@ -166,12 +166,12 @@ buffer_t* attach_shm(int shmid){
  */
 void start_client(int shmid, int isProducer, buffer_t* buffer, sem_t* semaphores, short* client_id){
     // Attach the shared memory segment 
-    buffer = attach_shm(shmid);
+    attach_shm(shmid, buffer);
     // Get the semaphores used to access the data
     // semaphores[0]: mutex, 
     // semaphores[1]: empty_spaces, 
     // semaphores[2]: available_msgs
-    semaphores = get_semaphores();
+    get_semaphores(semaphores);
 
     // Wait for acces to get the client id
     sem_wait(semaphores);
@@ -180,7 +180,9 @@ void start_client(int shmid, int isProducer, buffer_t* buffer, sem_t* semaphores
     if (isProducer) {
         // if producer store the id and increase the number of 
         // connected producers
+        printf("%d\n", buffer->producers);
         *client_id = (buffer->producers)++;
+        printf("%d\n", buffer->producers);
     } else {
         // if consumer store the id and increase the number of 
         // connected consumers
@@ -203,19 +205,14 @@ void start_client(int shmid, int isProducer, buffer_t* buffer, sem_t* semaphores
 int search_target(buffer_t* buffer, int target_value){
 
     // Index of the msg
-    int i;
-    // tmp variable
-    short* current_value;
-    
+    int i;    
 
     // Check availability of all slots
     for (i = 0; i < MAX_MSGS; ++i)
     {
-        // Get current slot value
-        current_value = buffer->available_slots + i;
         // Check if the slot is equal to the target
         // TRUE is full and FALSE is empty
-        if(*current_value == target_value){
+        if(buffer->available_slots[i] == target_value){
             return i;
         }
     }
@@ -245,10 +242,8 @@ void send_msg(message_t msg, buffer_t* buffer){
     // If everything is ok then send the message and print the success notification
     else {
 
-        // Extract the ptr to the msg slot
-        message_t* slt = (buffer->msg + idx);
         // Assign the new msg
-        *slt = msg;
+        buffer->msg[idx] = msg;
 
         // Print notifications
         printf("-----------------------------------------------------------\n");
@@ -268,7 +263,7 @@ int receive_msg(buffer_t* buffer){
 
     // Check for errors
     if (idx == -1) {
-        perror("send msg failed");
+        perror("msg reception failed");
         exit(EXIT_FAILURE);
     }  
     // If everything is ok then send the message and print the success notification
@@ -276,6 +271,7 @@ int receive_msg(buffer_t* buffer){
 
         // Extract the ptr to the msg slot
         message = (buffer->msg + idx);
+        buffer->next_consumer = (++buffer->next_consumer) % buffer->consumers;
 
         // Print notifications
         printf("-----------------------------------------------------------\n");

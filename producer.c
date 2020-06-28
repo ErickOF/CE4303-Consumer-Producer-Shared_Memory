@@ -28,16 +28,17 @@ int main(int argc, char *argv[])
     short self_id;
 
     // Shared memory buffer
-    buffer_t* buffer;
+    buffer_t* buffer = (buffer_t*)malloc(sizeof(buffer_t));
+    printf("ptr of buffer after assignment before start %p\n", buffer);
     // Get the semaphores used to access the data
     // semaphores[0]: mutex, 
     // semaphores[1]: empty_spaces, 
     // semaphores[2]: available_msgs
-    sem_t* semaphores;
+    sem_t* semaphores = (sem_t*)malloc(3 * sizeof(sem_t));
 
     // Initialize buffer, semaphores and client id
     start_client(*parameters, TRUE, buffer, semaphores, &self_id);
-
+    printf("ptr of buffer after assignment outside start %p\n", buffer);
     // Initialize random lib
     srand((unsigned) time(NULL));
     // Get random time
@@ -52,6 +53,8 @@ int main(int argc, char *argv[])
 
         //Check if the buffer is still active
         isSending = buffer->isActive;
+        printf("IsSending %d\n", isSending);
+        isSending = FALSE;
 
         // If it is then send the msg
         if(isSending){
@@ -69,9 +72,7 @@ int main(int argc, char *argv[])
         // If the buffer is down 
         else{
             // Decrease the producer counter
-            --(buffer->producers);
-            printf("Setected unactive buffer, detaching...\n");
-
+            --buffer->producers;
         }
 
         // Release mutex
@@ -80,7 +81,9 @@ int main(int argc, char *argv[])
         sem_post(semaphores + 2);
 
         // Sleep time 
-        sleep(*(parameters + 1));
+        //sleep(*(parameters + 1));
+        sleep(self_id);
+
     }
 
     // Detach from shared memory

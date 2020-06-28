@@ -88,7 +88,6 @@ int* parse_producer(int argc, char *argv[]){
 
 	// Checking if number of argument is 
 	// equal to 5 or not. 
-    printf("%d\n", argc);
 	if (argc != 5) 
 	{ 
 		printf("Please enter only the buffer name and avg send time. \nExample: producer -bn <buffer_name> -ti <avg_time(seconds)>\n"); 
@@ -104,6 +103,7 @@ int* parse_producer(int argc, char *argv[]){
                 // Get the associated shared memory id
                 *values = get_shared_mem_id(argv[i+1], 0);
                 valid_arguments[0] = 1;
+                
             }
             else
             {
@@ -156,8 +156,7 @@ int* parse_consumer(int argc, char *argv[]){
 
 	// Checking if number of argument is 
 	// equal to 5 or not. 
-    printf("%d\n", argc);
-	if (argc != 5) 
+	if (argc != 7) 
 	{ 
 		printf("Please enter only the buffer name, avg send time and access mode. \nExample: producer -bn <buffer_name> -ti <avg_time(seconds)> -am <0 for manual, 1 for automatic>\n"); 
 		return 0; 
@@ -239,7 +238,6 @@ int* parse_killer(int argc, char *argv[]){
 
 	// Checking if number of argument is 
 	// equal to 3 or not. 
-    
 	if (argc != 3)  { 
 		printf("Please enter only the buffer name. \nExample: killer -bn <buffer_name>\n");
 		return 0; 
