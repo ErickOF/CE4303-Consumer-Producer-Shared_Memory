@@ -58,6 +58,7 @@ typedef struct Buffer
     short producers;
     short next_consumer;
     short isActive;
+    sem_t semaphores[3];
     short available_slots[MAX_MSGS];
     message_t msg[MAX_MSGS];
 } buffer_t;
@@ -139,60 +140,22 @@ int get_shared_mem_id(const char* buffer_name, int flag){
  * Returns
  *      buffer_t* shared memory buffer structure.
  */
-void attach_shm(int shmid, buffer_t* buffer){
+buffer_t* attach_shm(int shmid){
     // Attaches the shared memory segment associated with the shared
     // memory identifier shmid to the data segment of the calling
     // process.
     // https://www.mkssoftware.com/docs/man3/shmat.3.asp
-    *buffer = *(buffer_t*) shmat(shmid, NULL, 0);
+    buffer_t* buffer = (buffer_t*) shmat(shmid, NULL, 0);
 
     // Check for errors
-    if ((*(int*)buffer) == -1) {
-        printf("Buffer not found.\n"); 
+    if (buffer == (buffer_t*)-1) {
+        perror("Failed shmat attempt \n"); 
         exit(EXIT_FAILURE);
     }
+
+    return buffer;
 }
 
-
-/**
- * This function encapsulates memory attachment, semaphore generation and
- * id extraction for consumers and producers
- *
- * Params:
- *      int shmid - shared memory buffer id to be attached
- *      int isProducer - boolean that defines the kind of client
- *      buffer_t* buffer - ptr to the buffer msg buffer
- *      sem_t* semaphores - ptr to the needed semaphores
- *      short* client_id - ptr to the client id
- */
-void start_client(int shmid, int isProducer, buffer_t* buffer, sem_t* semaphores, short* client_id){
-    // Attach the shared memory segment 
-    attach_shm(shmid, buffer);
-    // Get the semaphores used to access the data
-    // semaphores[0]: mutex, 
-    // semaphores[1]: empty_spaces, 
-    // semaphores[2]: available_msgs
-    get_semaphores(semaphores);
-
-    // Wait for acces to get the client id
-    sem_wait(semaphores);
-
-    // Check if we have consumer or producer
-    if (isProducer) {
-        // if producer store the id and increase the number of 
-        // connected producers
-        *client_id = (buffer->producers)++;
-    } 
-    else {
-        // if consumer store the id and increase the number of 
-        // connected consumers
-        *client_id = (buffer->consumers)++;
-    }
-
-    // Free the mutex
-    sem_post(semaphores);
-
-}
 
 /**
  * This function search for a defined value in the available slots array
@@ -212,7 +175,6 @@ int search_target(buffer_t* buffer, int target_value){
     {
         // Check if the slot is equal to the target
         // TRUE is full and FALSE is empty
-        printf("Slot %d with value %d \n", i, buffer->available_slots[i]);
         if(buffer->available_slots[i] == target_value){
             return i;
         }
@@ -246,12 +208,14 @@ void send_msg(message_t msg, buffer_t* buffer){
 
         // Assign the new msg
         buffer->msg[idx] = msg;
+        // Set the slot as full
+        buffer->available_slots[idx] = TRUE;
 
         // Print notifications
         printf("-----------------------------------------------------------\n");
         printf("Mensaje colocado en la posicion %d satisfactoriamente\n", idx);
-        printf("Productores activos: %d", buffer->producers);
-        printf("Consumidores activos: %d", buffer->consumers);
+        printf("Productores activos: %d\n", buffer->producers);
+        printf("Consumidores activos: %d\n", buffer->consumers);
         printf("-----------------------------------------------------------\n");
     }
 }
@@ -273,13 +237,16 @@ int receive_msg(buffer_t* buffer){
 
         // Extract the ptr to the msg slot
         message = (buffer->msg + idx);
+        // Set the slot as empty
+        buffer->available_slots[idx] = FALSE;
+        // Update turn
         buffer->next_consumer = (++buffer->next_consumer) % buffer->consumers;
 
         // Print notifications
         printf("-----------------------------------------------------------\n");
         printf("Mensaje recibido en la posicion %d con un valor de %d\n", idx, message->data);
-        printf("Productores activos: %d", buffer->producers);
-        printf("Consumidores activos: %d", buffer->consumers);
+        printf("Productores activos: %d\n", buffer->producers);
+        printf("Consumidores activos: %d\n", buffer->consumers);
         printf("-----------------------------------------------------------\n");
 
     }

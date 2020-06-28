@@ -16,6 +16,7 @@ void get_semaphores(sem_t* semaphores){
 
     // Sets the mutual execution control, starts at 1 since its a binary sem
     semaphores[0] = *sem_open(mutex, O_CREAT, semaphore_flags, 1);
+    
     // Producer control, wait for it to send msgs and post from
     // consumers to make spaces available, starts with MX_MSGS empty slots
     semaphores[1] = *sem_open(empty, O_CREAT, semaphore_flags, MAX_MSGS);
@@ -47,6 +48,34 @@ void get_semaphores(sem_t* semaphores){
     }
 
 }
+
+
+int isValidSemaphore(sem_t* semaphores){
+
+    int a = -8;
+    int b = -8;
+    int c = -8;
+    int e;
+    e = sem_getvalue(semaphores, &a);
+    if(e ==-1){
+        perror("Error on sem 0");
+    }
+    printf("sem 0 ptr %p and value %i\n", semaphores, a);
+    e = sem_getvalue(semaphores + 1 , &b);
+    if(e ==-1){
+        perror("Error on sem 0");
+    }
+    printf("sem 1 ptr %p and value %i\n", semaphores + 1, b);
+    e = sem_getvalue(semaphores + 2, &c);
+    if(e ==-1){
+        perror("Error on sem 0");
+    }
+    printf("sem 2 ptr %p and value %i\n", semaphores + 2, c);
+
+    return a + b + c;
+}
+
+
 
 
 

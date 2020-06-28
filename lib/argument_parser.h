@@ -203,7 +203,7 @@ int* parse_consumer(int argc, char *argv[]){
             
         }
     }
-
+    
     // Check we read all the values 
     if(*values == -1){
         printf("Missing buffer name\n"); 

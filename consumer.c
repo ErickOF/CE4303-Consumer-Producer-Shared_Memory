@@ -4,12 +4,30 @@
 // C program for finding the largest integer 
 // among three numbers using command line arguments 
 #include <stdio.h> 
+#include <termios.h>
 #include <unistd.h>
 
 #include "lib/argument_parser.h"
 #include "lib/semaphores.h"
 #include "lib/random_number_genarator.h"
 
+
+
+
+int usr_input(){
+
+    int ch;
+    struct termios oldt, newt;
+
+    tcgetattr ( STDIN_FILENO, &oldt );
+    newt = oldt;
+    newt.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr ( STDIN_FILENO, TCSANOW, &newt );
+    ch = getchar();
+    tcsetattr ( STDIN_FILENO, TCSANOW, &oldt );
+
+    return ch;
+}
 
 // Taking argument as command line 
 int main(int argc, char *argv[]) 
@@ -28,29 +46,45 @@ int main(int argc, char *argv[])
     short isRecieving = TRUE;
     short self_id;
     int data;
-
+    
     // Shared memory buffer
-    buffer_t* buffer;
-    // Get the semaphores used to access the data
+    buffer_t* buffer = attach_shm(*parameters);
+    // Semaphores used to access the data
     // semaphores[0]: mutex, 
     // semaphores[1]: empty_spaces, 
     // semaphores[2]: available_msgs
-    sem_t* semaphores[3];
 
-    // Initialize buffer, semaphores and client id
-    start_client(*parameters, FALSE, buffer, semaphores, &self_id);
+    // Acces number of producers
+    sem_wait(buffer->semaphores);
+    self_id = buffer->consumers++;
+    // Free the mutex
+    sem_post(buffer->semaphores);
+    printf("Productores activos %d\n", buffer->producers);
+
 
     // Initialize random lib
     srand((unsigned) time(NULL));
+    
     // Get random time
     double time = poisson_distribution(*(parameters + 1));
 
     // Only send when the buffer is active
     while (isRecieving) {
+
+        int a = -8;
+        sem_getvalue(buffer->semaphores, &a);
+        printf("sem 0 ptr %p and value %d\n", buffer->semaphores, a);
+        a = -8;
+        sem_getvalue(buffer->semaphores + 1 , &a);
+        printf("sem 1 ptr %p and value %d\n", buffer->semaphores + 1, a);
+        a = -8;
+        sem_getvalue(buffer->semaphores + 2, &a);
+        printf("sem 2 ptr %p and value %d\n", buffer->semaphores + 2, a);
+
         // Wait for full spaces
-        sem_wait(semaphores + 2);
+        sem_wait(buffer->semaphores + 2);
         // Wait for mutex
-        sem_wait(semaphores);
+        sem_wait(buffer->semaphores);
 
         //Check if the buffer is still active
         isRecieving = buffer->isActive;
@@ -63,12 +97,14 @@ int main(int argc, char *argv[])
                 // if we are on manual mode
                 if(*(parameters + 2) == FALSE){
                     printf("Press enter to recieve a msg ");
-                    scanf("%s");
+                    usr_input();
                 }
                 
 
                 // Recieve the msg data
                 data = receive_msg(buffer);
+                // Update recieved msgs
+                ++num_messages;
 
                 // if the data is equal to our id modulus 6
                 if(data == self_id%6){
@@ -93,16 +129,16 @@ int main(int argc, char *argv[])
         
 
         // Release mutex
-        sem_post(semaphores);
+        sem_post(buffer->semaphores);
         // Update new empty space available
-        sem_post(semaphores + 1);
+        sem_post(buffer->semaphores + 1);
 
         // Sleep time 
         //sleep(*(parameters + 1));
-        sleep(self_id);
+        sleep(self_id + 1);
 
     }
-
+    
     // Detach from shared memory
     shmdt(buffer);
     // TODO HANDLE PRINTS OVER HERE

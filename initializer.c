@@ -31,9 +31,9 @@ int main(int argc, char* argv[]) {
     // Initialize msg related arrays
     for(size_t i = 0; i < MAX_MSGS; i++){
         buffer->available_slots[i] = FALSE;
-        printf("%d\n", buffer->available_slots[i]);
     }
-    
+    // Initialize semaphores
+    get_semaphores(buffer->semaphores);
 
     printf("Buffer created.\n");
 

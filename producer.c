@@ -28,15 +28,19 @@ int main(int argc, char *argv[])
     short self_id;
 
     // Shared memory buffer
-    buffer_t* buffer = (buffer_t*)malloc(sizeof(buffer_t));
-    // Get the semaphores used to access the data
+    buffer_t* buffer = attach_shm(*parameters);
+    // Semaphores used to access the data
     // semaphores[0]: mutex, 
     // semaphores[1]: empty_spaces, 
     // semaphores[2]: available_msgs
-    sem_t* semaphores = (sem_t*)malloc(3 * sizeof(sem_t));
 
-    // Initialize buffer, semaphores and client id
-    start_client(*parameters, TRUE, buffer, semaphores, &self_id);
+    // Acces number of producers
+    sem_wait(buffer->semaphores);
+    self_id = buffer->producers++;
+    // Free the mutex
+    sem_post(buffer->semaphores);
+
+
     // Initialize random lib
     srand((unsigned) time(NULL));
     // Get random time
@@ -44,10 +48,22 @@ int main(int argc, char *argv[])
 
     // Only send when the buffer is active
     while(isSending){
+
+        int a = -8;
+        sem_getvalue(buffer->semaphores, &a);
+        printf("sem 0 ptr %p and value %d\n", buffer->semaphores, a);
+        a = -8;
+        sem_getvalue(buffer->semaphores + 1 , &a);
+        printf("sem 1 ptr %p and value %d\n", buffer->semaphores + 1, a);
+        a = -8;
+        sem_getvalue(buffer->semaphores + 2, &a);
+        printf("sem 2 ptr %p and value %d\n", buffer->semaphores + 2, a);
+
+
         // Wait for empty spaces
-        sem_wait(semaphores + 1);
+        sem_wait(buffer->semaphores + 1);
         // Wait for mutex
-        sem_wait(semaphores);
+        sem_wait(buffer->semaphores);
 
         //Check if the buffer is still active
         isSending = buffer->isActive;
@@ -57,34 +73,32 @@ int main(int argc, char *argv[])
     
             // TODO : BUILD MESSAGES CORRECTLY
             // Create msg
-            message_t msg = {.producer_id=self_id, .data=self_id, 
+            message_t msg = {.producer_id=self_id, .data=(rand() % 6), 
                             .date=10, .time=11};
             // Send the msg
             send_msg(msg, buffer);
             // Increment the counter
             ++num_messages;
-            printf("Over here\n");
 
         }
         // If the buffer is down 
         else{
             // Decrease the producer counter
             --buffer->producers;
+            isSending = FALSE;
         }
-        isSending = FALSE;
-        printf("Over here\n");
 
         // Release mutex
-        sem_post(semaphores);
+        sem_post(buffer->semaphores);
         // Update available
-        sem_post(semaphores + 2);
+        sem_post(buffer->semaphores + 2);
 
         // Sleep time 
         //sleep(*(parameters + 1));
-        sleep(self_id);
+        sleep(self_id + 5);
 
     }
-
+    
     // Detach from shared memory
     shmdt(buffer);
     // TODO HANDLE PRINTS OVER HERE

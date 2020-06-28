@@ -1,4 +1,4 @@
-.PONY: build create_buffer create_producer create_consumer kill_buffer clean
+.PONY: build clean create_buffer create_producer create_consumer kill_buffer restart_buffer 
 
 INITIALIZER=initializer
 FINISHER=finisher
@@ -60,6 +60,10 @@ kill_buffer:
 	@gcc -o ${BUILD_DIR}/$(FINISHER).out $(FINISHER).c $(SEMFLAGS)
 	@echo "Killing <${BUFFER_NAME}> buffer"
 	@${BUILD_DIR}/${FINISHER}.out -bn ${BUFFER_NAME}
+
+restart_buffer:
+	@make kill_buffer
+	@make create_buffer
 
 
 clean:
