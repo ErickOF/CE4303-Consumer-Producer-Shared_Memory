@@ -12,7 +12,12 @@
 #include "lib/random_number_genarator.h"
 
 
-// Function to calc the date and time of the moment
+/**
+ * This function return current datetime.
+ * 
+ * Params:
+ *     char date - var to store datetime.
+ */
 void get_date(char date_n_time[DNT_LEN]){
 	time_t t = time(NULL);
 	struct tm *tm = localtime(&t);
@@ -73,9 +78,13 @@ int main(int argc, char *argv[])
             char date_n_time[DNT_LEN];
             get_date(date_n_time);
             // Create msg
-            message_t msg = {.producer_id=self_id, 
-                            .data=(rand() % 7), 
-                            .date_n_time=date_n_time};
+            message_t msg = {
+                .producer_id=self_id, 
+                .data=(rand() % 7), 
+                .date_n_time=date_n_time
+            };
+
+            strcpy(msg.date_n_time, date_n_time);
 
             // Send the msg
             send_msg(msg, buffer);
