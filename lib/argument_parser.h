@@ -17,6 +17,8 @@ int* parse_initializer(int argc, char *argv[]){
     *values = -1;
     *(values + 1) = -1;
 
+    char* buffer_name = (char*) calloc(64, sizeof(char));
+
 	// Checking if number of argument is 
 	// equal to 4 or not. 
 	if (argc != 5) { 
@@ -27,47 +29,49 @@ int* parse_initializer(int argc, char *argv[]){
     for (int i = 0; i < argc; ++i) {
         // If we recive the buffer name
         if (strcmp(argv[i], "-bn") == 0) {
-            // And we havent recieved it
-            if (valid_arguments[0] == 0) {
-                // Get the associated shared memory id
-                *values = get_shared_mem_id(argv[i + 1], IPC_CREAT | IPC_EXCL);
-                valid_arguments[0] = 1;
-            } else {
-                printf("Entered buffer name twice.\n"); 
-                exit(EXIT_FAILURE);
-            }
-            
+            strcpy(buffer_name, argv[i + 1]);
+            valid_arguments[0] = 1;
         }
         // If we recive the avg message time
         else if(strcmp(argv[i], "-bs") == 0) {
             // And we havent recieved it
             if (valid_arguments[1] == 0) {
-                if (isdigit(argv[i + 1])) {
-                    // Store it
-                    *(values + 1) = atoi(argv[i + 1]);
-                    valid_arguments[1] = 1;
-                } else {
-                    printf("Buffer size must be a number.\n"); 
-                    exit(EXIT_FAILURE);
+                // Validate number
+                int j = 0;
+
+                while (argv[i + 1][j] != '\0') {
+                    if (!isdigit(argv[i + 1][j])) {
+                        printf("Buffer size must be a number.\n"); 
+                        exit(EXIT_FAILURE);
+                    }
+
+                    j++;
                 }
-                
+
+                // Store it
+                *(values + 1) = atoi(argv[i + 1]);
+                valid_arguments[1] = 1;
             } else {
                 printf("Entered buffer size twice.\n"); 
                 exit(EXIT_FAILURE);
             }
-            
         }
     }
 
     // Check we read all the values 
-    if (*values == -1) {
+    if (valid_arguments[0] == 0) {
         printf("Missing buffer name\n"); 
         exit(EXIT_FAILURE);
-    } 
-    if (*(values + 1) == -1) {
-        printf("Missing buffer size\n"); 
+    } else if (valid_arguments[1] == -1) {
+        printf("Missing buffer size\n");
         exit(EXIT_FAILURE);
+    } else {
+        // Get the associated shared memory id
+        *values = get_shared_mem_id(buffer_name, IPC_CREAT | IPC_EXCL);
     }
+
+    // Clear memory
+    free(buffer_name);
 
     return values;
 }
