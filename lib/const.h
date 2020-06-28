@@ -5,14 +5,16 @@
 #define TRUE 1
 #define FALSE 0
 
-/*      SHARED MEMORY CONSTANTS      */
+/*   DATE AND TIME CONSTANTS   */
+#define DNT_LEN 25
+
+
+/*   SHARED MEMORY CONSTANTS   */
 #define MAX_MSGS 10
-
-
 const short buffer_flags = 0666;
 
 
-/*      SEMAPHORE CONSTANTS      */
+/*     SEMAPHORE CONSTANTS     */
 // Semaphore names
 // Mutual excecution control 
 const char* mutex = "mutex";

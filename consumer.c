@@ -64,23 +64,13 @@ int main(int argc, char *argv[])
 
     // Initialize random lib
     srand((unsigned) time(NULL));
-    
+
     // Get random time
     double time = poisson_distribution(*(parameters + 1));
 
     // Only send when the buffer is active
     while (isRecieving) {
-
-        int a = -8;
-        sem_getvalue(buffer->semaphores, &a);
-        printf("sem 0 ptr %p and value %d\n", buffer->semaphores, a);
-        a = -8;
-        sem_getvalue(buffer->semaphores + 1 , &a);
-        printf("sem 1 ptr %p and value %d\n", buffer->semaphores + 1, a);
-        a = -8;
-        sem_getvalue(buffer->semaphores + 2, &a);
-        printf("sem 2 ptr %p and value %d\n", buffer->semaphores + 2, a);
-
+        
         // Wait for full spaces
         sem_wait(buffer->semaphores + 2);
         // Wait for mutex
@@ -134,8 +124,8 @@ int main(int argc, char *argv[])
         sem_post(buffer->semaphores + 1);
 
         // Sleep time 
-        //sleep(*(parameters + 1));
-        sleep(self_id + 1);
+        sleep(poisson_distribution( (double)*(parameters + 1) ));
+        
 
     }
     

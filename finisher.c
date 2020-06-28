@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "lib/shared_memory.h"
 #include "lib/argument_parser.h"
@@ -22,12 +23,20 @@ int main(int argc, char *argv[]) {
     // memory identifier shmid to the data segment of the calling
     // process.
     // https://www.mkssoftware.com/docs/man3/shmat.3.asp
-    buffer_t* buffer = (buffer_t*) shmat(shmid, NULL, 0);
+    buffer_t* buffer = attach_shm(shmid);
 
-    if (buffer == (void *) -1) {
-      printf("Error: Shared memory attach");
-      exit(1);
-    }
+
+    // Acces number of producers
+    //sem_wait(buffer->semaphores);
+    // Send the kill signal 
+    buffer->isActive = FALSE;
+    // Free the mutex
+    //sem_post(buffer->semaphores);
+
+	//sleep(5);
+
+
+    // TODO: HANDLE SEMAPHORES
 
     // Detach and destroy shared memory for buffer
     shmdt(buffer);

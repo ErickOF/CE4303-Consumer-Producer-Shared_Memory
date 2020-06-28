@@ -32,12 +32,10 @@ extern int errno;
  * int date - sent date of the msg.
  * int time - time the msg was sent.
  */
-typedef struct Message
-{
+typedef struct Message{
     short producer_id;
     int data;
-    int date;
-    int time;
+    char date_n_time[25];
 } message_t;
 
 
@@ -52,8 +50,7 @@ typedef struct Message
  *                         the msg array, has size MAX_MSGS.
  * message_t msg - array that contains the msgs sent by the producers, has size MAX_MSGS.
  */
-typedef struct Buffer
-{
+typedef struct Buffer{
     short consumers;
     short producers;
     short next_consumer;
@@ -200,7 +197,7 @@ void send_msg(message_t msg, buffer_t* buffer){
 
     // Check for errors
     if (idx == -1) {
-        perror("send msg failed");
+        printf("send msg failed");
         exit(EXIT_FAILURE);
     }  
     // If everything is ok then send the message and print the success notification
@@ -213,7 +210,10 @@ void send_msg(message_t msg, buffer_t* buffer){
 
         // Print notifications
         printf("-----------------------------------------------------------\n");
-        printf("Mensaje colocado en la posicion %d satisfactoriamente\n", idx);
+        printf("\033[1;32m");   // Agrega color verde
+        printf("El siguiente mensaje fue colocado en la posicion %d con éxito\n", idx);
+        printf("Productor: %d\tDatos %d\t Fecha y hora: %s\n", msg.producer_id, msg.data, msg.date_n_time);
+        printf("\033[0m");      // Desactiva el color verde
         printf("Productores activos: %d\n", buffer->producers);
         printf("Consumidores activos: %d\n", buffer->consumers);
         printf("-----------------------------------------------------------\n");

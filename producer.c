@@ -12,6 +12,14 @@
 #include "lib/random_number_genarator.h"
 
 
+// Function to calc the date and time of the moment
+void get_date(char date_n_time[DNT_LEN]){
+	time_t t = time(NULL);
+	struct tm *tm = localtime(&t);
+    strftime(date_n_time, DNT_LEN - 1, "%Y-%m-%d %H:%M:%S", tm);
+}
+
+
 // Taking argument as command line 
 int main(int argc, char *argv[]) 
 { 
@@ -40,30 +48,20 @@ int main(int argc, char *argv[])
     // Free the mutex
     sem_post(buffer->semaphores);
 
-
     // Initialize random lib
     srand((unsigned) time(NULL));
-    // Get random time
-    double time = poisson_distribution(*(parameters + 1));
 
     // Only send when the buffer is active
     while(isSending){
-
-        int a = -8;
-        sem_getvalue(buffer->semaphores, &a);
-        printf("sem 0 ptr %p and value %d\n", buffer->semaphores, a);
-        a = -8;
-        sem_getvalue(buffer->semaphores + 1 , &a);
-        printf("sem 1 ptr %p and value %d\n", buffer->semaphores + 1, a);
-        a = -8;
-        sem_getvalue(buffer->semaphores + 2, &a);
-        printf("sem 2 ptr %p and value %d\n", buffer->semaphores + 2, a);
-
 
         // Wait for empty spaces
         sem_wait(buffer->semaphores + 1);
         // Wait for mutex
         sem_wait(buffer->semaphores);
+
+        int b;
+        sem_getvalue(buffer->semaphores + 1 , &b);
+        printf("%d\n", b);
 
         //Check if the buffer is still active
         isSending = buffer->isActive;
@@ -71,10 +69,14 @@ int main(int argc, char *argv[])
         // If it is then send the msg
         if(isSending){
     
-            // TODO : BUILD MESSAGES CORRECTLY
+            // Get the date and time 
+            char date_n_time[DNT_LEN];
+            get_date(date_n_time);
             // Create msg
-            message_t msg = {.producer_id=self_id, .data=(rand() % 6), 
-                            .date=10, .time=11};
+            message_t msg = {.producer_id=self_id, 
+                            .data=(rand() % 7), 
+                            .date_n_time=date_n_time};
+
             // Send the msg
             send_msg(msg, buffer);
             // Increment the counter
@@ -94,10 +96,21 @@ int main(int argc, char *argv[])
         sem_post(buffer->semaphores + 2);
 
         // Sleep time 
-        //sleep(*(parameters + 1));
-        sleep(self_id + 5);
+        sleep(expo_distribution( (double)*(parameters + 1) ));
 
     }
+
+    printf("\033[1m");
+    printf("-----------------------------------------------------------\n");
+    printf("----------------- Productor %d finalizado -----------------\n", self_id);
+    printf("-----------------------------------------------------------\n");
+    printf("\033[0m");
+
+    printf("\033[1m");
+    printf("-----------------------------------------------------------\n");
+    printf("-----------------------------------------------------------\n");
+    printf("-----------------------------------------------------------\n");
+    printf("\033[0m");
     
     // Detach from shared memory
     shmdt(buffer);
