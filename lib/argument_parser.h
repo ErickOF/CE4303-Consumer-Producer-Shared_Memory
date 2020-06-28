@@ -34,27 +34,21 @@ int* parse_initializer(int argc, char *argv[]){
         }
         // If we recive the avg message time
         else if(strcmp(argv[i], "-bs") == 0) {
-            // And we havent recieved it
-            if (valid_arguments[1] == 0) {
-                // Validate number
-                int j = 0;
+            // Validate number
+            int j = 0;
 
-                while (argv[i + 1][j] != '\0') {
-                    if (!isdigit(argv[i + 1][j])) {
-                        printf("Buffer size must be a number.\n"); 
-                        exit(EXIT_FAILURE);
-                    }
-
-                    j++;
+            while (argv[i + 1][j] != '\0') {
+                if (!isdigit(argv[i + 1][j])) {
+                    printf("Buffer size must be a number.\n"); 
+                    exit(EXIT_FAILURE);
                 }
 
-                // Store it
-                *(values + 1) = atoi(argv[i + 1]);
-                valid_arguments[1] = 1;
-            } else {
-                printf("Entered buffer size twice.\n"); 
-                exit(EXIT_FAILURE);
+                j++;
             }
+
+            // Store it
+            *(values + 1) = atoi(argv[i + 1]);
+            valid_arguments[1] = 1;
         }
     }
 
@@ -145,9 +139,8 @@ int* parse_producer(int argc, char *argv[]){
 
 
 int* parse_consumer(int argc, char *argv[]){
-
-    //                      buffer name, avg seconds, access mode
-    int valid_arguments[3] = {0         ,      0,       0};
+    // buffer name, avg seconds, access mode
+    int valid_arguments[3] = {0 , 0, 0};
     // [0] is buffer id, [1] is avg seconds, [2] access mode
     int* values = (int*)malloc(3 * sizeof(int)); 
     *values = -1;
@@ -233,36 +226,30 @@ int* parse_killer(int argc, char *argv[]){
     // buffer name
     int valid_arguments = 0;
     // [0] is buffer id 
-    int* values = (int*)malloc(1 * sizeof(int)); 
+    int* values = (int*) malloc(1 * sizeof(int)); 
     *values = -1;
 
 	// Checking if number of argument is 
 	// equal to 3 or not. 
-	if (argc != 3)  { 
+	if (argc != 3) { 
 		printf("Please enter only the buffer name. \nExample: killer -bn <buffer_name>\n");
 		return 0; 
 	} 
 
     for (int i = 0; i < argc; ++i) {
         // If we recive the buffer name
-        if(strcmp(argv[i], "-bn") == 0){
+        if (strcmp(argv[i], "-bn") == 0) {
             // And we havent recieved it
-            if(valid_arguments == 0){
+            if (valid_arguments == 0) {
                 // Get the associated shared memory id
                 *values = get_shared_mem_id(argv[i + 1], 0);
                 valid_arguments = 1;
             }
-            else
-            {
-                printf("Entered buffer name twice\n"); 
-                exit(EXIT_FAILURE);
-            }
-            
         }
     }
 
     // Check we read all the values 
-    if (*values == -1){
+    if (valid_arguments == 0){
         printf("Missing buffer name\n"); 
         exit(EXIT_FAILURE);
     }

@@ -4,15 +4,15 @@ INITIALIZER=initializer
 FINISHER=finisher
 PRODUCER=producer
 CONSUMER=consumer
-SEMFLAGS = -pthread -lrt -lm
-DEFAULT_BNAME = Default
-DEFAULT_BSIZE = 256
-DEFAULT_BTIME = 3
-BUILD_DIR = bin
-
+SEMFLAGS=-pthread -lrt -lm
+DEFAULT_BNAME=Default
+DEFAULT_BSIZE=256
+DEFAULT_BTIME=3
+BUILD_DIR=bin
 
 BUFFER_NAME=test_buffer
 BUFFER_SIZE=1024
+
 
 build:
 	@if [ ! -d ${BUILD_DIR} ]; then \
@@ -23,9 +23,6 @@ build:
 	@gcc -o ${BUILD_DIR}/$(PRODUCER).out $(PRODUCER).c $(SEMFLAGS)
 	@gcc -o ${BUILD_DIR}/$(CONSUMER).out $(CONSUMER).c $(SEMFLAGS)
 
-test-default:
-	@echo "Creating Buffer"
-	@${BUILD_DIR}/${INITIALIZER}.out -bn ${BUFFER_NAME} -bs ${DEFAULT_BSIZE}
 
 test-default-init:
 	@echo "Creating Buffer"
@@ -42,6 +39,7 @@ test-default-consumer:
 test-default-killer:
 	@echo "Finisher"
 	@${BUILD_DIR}/${FINISHER}.out -bn ${DEFAULT_BNAME}
+
 
 create_buffer:
 	@gcc -o ${BUILD_DIR}/$(INITIALIZER).out $(INITIALIZER).c $(SEMFLAGS)
@@ -62,6 +60,7 @@ kill_buffer:
 	@gcc -o ${BUILD_DIR}/$(FINISHER).out $(FINISHER).c $(SEMFLAGS)
 	@echo "Killing <${BUFFER_NAME}> buffer"
 	@${BUILD_DIR}/${FINISHER}.out -bn ${BUFFER_NAME}
+
 
 clean:
 	@rm ${BUILD_DIR}/*.out

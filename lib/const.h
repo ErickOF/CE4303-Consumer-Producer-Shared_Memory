@@ -8,8 +8,7 @@
 /*      SHARED MEMORY CONSTANTS      */
 #define MAX_MSGS 10
 
-const int BUFFER_ID = 256;
-const int buffer_size = 1024;
+
 const short buffer_flags = 0666;
 
 
