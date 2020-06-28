@@ -1,3 +1,7 @@
+#ifndef PROYECTO1_RANDOM_NUMBER_GENERATOR_H
+#define PROYECTO1_RANDOM_NUMBER_GENERATOR_H
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -29,3 +33,5 @@ long poisson_distribution(double lambda) {
 
     return --k;
 }
+
+#endif  // PROYECTO1_RANDOM_NUMBER_GENERATOR_H

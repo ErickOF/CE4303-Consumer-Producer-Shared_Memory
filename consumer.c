@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     // Consumer control and identification
     short isRecieving = TRUE;
     short self_id;
+    int data;
 
     // Shared memory buffer
     buffer_t* buffer;
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
     // semaphores[0]: mutex, 
     // semaphores[1]: empty_spaces, 
     // semaphores[2]: available_msgs
-    sem_t* semaphores;
+    sem_t* semaphores[3];
 
     // Initialize buffer, semaphores and client id
     start_client(*parameters, FALSE, buffer, semaphores, &self_id);
@@ -54,27 +55,42 @@ int main(int argc, char *argv[])
         //Check if the buffer is still active
         isRecieving = buffer->isActive;
 
-        // If it is then send the msg
+        // If it is recieving
         if (isRecieving) {
-            // TODO : BUILD MESSAGES CORRECTLY
-            // Create msg
-            message_t msg = {
-                .producer_id=self_id,
-                .data=self_id, 
-                .date=10, .time=11
-            };
-            // Send the msg
-            send_msg(msg, buffer);
+            // If its out turn to recieve
+            if(buffer->next_consumer == self_id){
 
+                // if we are on manual mode
+                if(*(parameters + 2) == FALSE){
+                    printf("Press enter to recieve a msg ");
+                    scanf("%s");
+                }
+                
+
+                // Recieve the msg data
+                data = receive_msg(buffer);
+
+                // if the data is equal to our id modulus 6
+                if(data == self_id%6){
+                    // Then stop consuming msgs
+                    isRecieving = FALSE;
+                    // Decrease the producer counter
+                    --(buffer->consumers);
+                    printf("-----------------------------------------------------------\n");
+                    printf("Detected msg equal to consumer id modulus 6, detaching consumer %d...\n", self_id);
+                
+
+                } 
+            }
         }
         // If the buffer is down 
         else {
             // Decrease the producer counter
             --(buffer->consumers);
             printf("-----------------------------------------------------------\n");
-            printf("Detected inactive buffer, detaching consumer %d\n", self_id);
-
+            printf("Detected inactive buffer, detaching consumer %d...\n", self_id);
         }
+        
 
         // Release mutex
         sem_post(semaphores);
@@ -82,7 +98,9 @@ int main(int argc, char *argv[])
         sem_post(semaphores + 1);
 
         // Sleep time 
-        sleep(*(parameters + 1));
+        //sleep(*(parameters + 1));
+        sleep(self_id);
+
     }
 
     // Detach from shared memory

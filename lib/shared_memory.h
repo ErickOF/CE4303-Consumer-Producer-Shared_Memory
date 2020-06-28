@@ -58,8 +58,8 @@ typedef struct Buffer
     short producers;
     short next_consumer;
     short isActive;
-    short* available_slots;
-    message_t* msg;
+    short available_slots[MAX_MSGS];
+    message_t msg[MAX_MSGS];
 } buffer_t;
 
 
@@ -110,6 +110,7 @@ int generate_uid(const char* s) {
 int get_shared_mem_id(const char* buffer_name, int flag){
     // Generate a key based on buffer name
     key_t key = (key_t) generate_uid(buffer_name);
+
     // Returns the shared memory identifier associated with key.
     // int shmget(key_t key, size_t size, int shmflg);
     // https://www.mkssoftware.com/docs/man3/shmget.3.asp
@@ -180,10 +181,9 @@ void start_client(int shmid, int isProducer, buffer_t* buffer, sem_t* semaphores
     if (isProducer) {
         // if producer store the id and increase the number of 
         // connected producers
-        printf("%d\n", buffer->producers);
         *client_id = (buffer->producers)++;
-        printf("%d\n", buffer->producers);
-    } else {
+    } 
+    else {
         // if consumer store the id and increase the number of 
         // connected consumers
         *client_id = (buffer->consumers)++;
@@ -212,6 +212,7 @@ int search_target(buffer_t* buffer, int target_value){
     {
         // Check if the slot is equal to the target
         // TRUE is full and FALSE is empty
+        printf("Slot %d with value %d \n", i, buffer->available_slots[i]);
         if(buffer->available_slots[i] == target_value){
             return i;
         }
@@ -233,6 +234,7 @@ int search_target(buffer_t* buffer, int target_value){
 void send_msg(message_t msg, buffer_t* buffer){
     // Search for an empty space in the available slots
     int idx = search_target(buffer, FALSE);
+    
 
     // Check for errors
     if (idx == -1) {

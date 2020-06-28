@@ -48,3 +48,5 @@ dkms.conf
 
 # VS Code
 .vscode/
+
+*.insyncdl

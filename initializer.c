@@ -22,14 +22,18 @@ int main(int argc, char* argv[]) {
     printf("ShmID %i\n", shmid);
 
     // Set values
-    // Initialize consumer and producer id values
+    // Initialize consumer, producer id values and consumer turn 
     buffer->consumers = 0;
     buffer->producers = 0;
+    buffer->next_consumer = 0;
     // Set system active
     buffer->isActive = 1;
     // Initialize msg related arrays
-    buffer->available_slots = (short*) calloc(MAX_MSGS, sizeof(short));
-    buffer->msg = (message_t*)malloc(MAX_MSGS * sizeof(message_t));
+    for(size_t i = 0; i < MAX_MSGS; i++){
+        buffer->available_slots[i] = FALSE;
+        printf("%d\n", buffer->available_slots[i]);
+    }
+    
 
     printf("Buffer created.\n");
 

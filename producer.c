@@ -29,7 +29,6 @@ int main(int argc, char *argv[])
 
     // Shared memory buffer
     buffer_t* buffer = (buffer_t*)malloc(sizeof(buffer_t));
-    printf("ptr of buffer after assignment before start %p\n", buffer);
     // Get the semaphores used to access the data
     // semaphores[0]: mutex, 
     // semaphores[1]: empty_spaces, 
@@ -38,7 +37,6 @@ int main(int argc, char *argv[])
 
     // Initialize buffer, semaphores and client id
     start_client(*parameters, TRUE, buffer, semaphores, &self_id);
-    printf("ptr of buffer after assignment outside start %p\n", buffer);
     // Initialize random lib
     srand((unsigned) time(NULL));
     // Get random time
@@ -53,12 +51,10 @@ int main(int argc, char *argv[])
 
         //Check if the buffer is still active
         isSending = buffer->isActive;
-        printf("IsSending %d\n", isSending);
-        isSending = FALSE;
 
         // If it is then send the msg
         if(isSending){
-
+    
             // TODO : BUILD MESSAGES CORRECTLY
             // Create msg
             message_t msg = {.producer_id=self_id, .data=self_id, 
@@ -67,6 +63,7 @@ int main(int argc, char *argv[])
             send_msg(msg, buffer);
             // Increment the counter
             ++num_messages;
+            printf("Over here\n");
 
         }
         // If the buffer is down 
@@ -74,6 +71,8 @@ int main(int argc, char *argv[])
             // Decrease the producer counter
             --buffer->producers;
         }
+        isSending = FALSE;
+        printf("Over here\n");
 
         // Release mutex
         sem_post(semaphores);
