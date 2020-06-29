@@ -6,7 +6,10 @@
 #define FALSE 0
 
 /*   DATE AND TIME CONSTANTS   */
+// Date and time len 
 #define DNT_LEN 25
+// Buffer name max len
+#define BN_LEN 64
 
 
 /*   SHARED MEMORY CONSTANTS   */

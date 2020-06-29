@@ -37,10 +37,13 @@ int main(int argc, char *argv[])
     // [1]:avg time sleep in seconds 
     // [2] access mode
     int* parameters = parse_consumer(argc, argv);
+    int pid_mod = getpid() % 6;
 
     // Statistics variables
     float total_locked_time = 0;
     float total_waiting_time = 0;
+
+    // Stats variables
     unsigned int num_messages = 0;
 
     double acc_waiting_time = 0;
@@ -148,11 +151,13 @@ int main(int argc, char *argv[])
                 ++num_messages;
 
                 // if the data is equal to our id modulus 6
-                if(data == self_id%6){
+                if(data == pid_mod){
                     // Then stop consuming msgs
                     isRecieving = FALSE;
                     // Decrease the producer counter
                     --(buffer->consumers);
+                    // Increase the dead buffer counter
+                    ++buffer->deleted_consumers[pid_mod];
                     printf("-----------------------------------------------------------\n");
                     printf("Detected msg equal to consumer id modulus 6, detaching consumer %d...\n", self_id);
                 } 
