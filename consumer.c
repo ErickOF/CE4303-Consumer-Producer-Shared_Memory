@@ -77,6 +77,9 @@ int main(int argc, char *argv[])
 
     // Only send when the buffer is active
     while (isRecieving) {
+
+        // Sleep time 
+        sleep(poisson_distribution( (double)*(parameters + 1) ));
         
         //printf("Esperando available\n");
         // Wait for full spaces
@@ -140,9 +143,6 @@ int main(int argc, char *argv[])
         printf("sem 1 ptr %p and value %i\n", buffer->semaphores + 1, b);
         sem_getvalue(buffer->semaphores + 2 , &a);
         printf("sem 2 ptr %p and value %i\n", buffer->semaphores + 2, a);*/
-
-        // Sleep time 
-        sleep(poisson_distribution( (double)*(parameters + 1) ));
         
     }
 
