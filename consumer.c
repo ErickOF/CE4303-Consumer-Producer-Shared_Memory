@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
                 // if we are on manual mode
                 if(*(parameters + 2) == FALSE){
-                    printf("Press enter to recieve a msg ");
+                    printf("Press enter to recieve a msg \n");
                     usr_input();
                 }
                 

@@ -54,7 +54,7 @@ create_producer:
 create_consumer:
 	@gcc -o ${BUILD_DIR}/$(CONSUMER).out $(CONSUMER).c $(SEMFLAGS)
 	@echo "Creating consumer 1 with mean sleep of 1 and manual mode"
-	@${BUILD_DIR}/${CONSUMER}.out -bn ${BUFFER_NAME} -ti 4 -am 1
+	@${BUILD_DIR}/${CONSUMER}.out -bn ${BUFFER_NAME} -ti 4 -am 0
 
 kill_buffer:
 	@gcc -o ${BUILD_DIR}/$(FINISHER).out $(FINISHER).c $(SEMFLAGS)
