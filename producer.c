@@ -14,7 +14,8 @@
 
 
 // Taking argument as command line 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     // Get the attachment parametters
     // [0]:shmid [1]:avg time sleep in seconds
     int* parameters = parse_producer(argc, argv);
@@ -56,7 +57,8 @@ int main(int argc, char *argv[]) {
     struct timeval start, stop;
 
     // Only send when the buffer is active
-    while (isSending) {
+    while (isSending)
+    {
         // Get waiting time
         int waiting_time = expo_distribution((double)* (parameters + 1));
         //printf("Esperando: %d\n", waiting_time);
@@ -90,10 +92,12 @@ int main(int argc, char *argv[]) {
         isSending = buffer->isActive;
 
         // If it is then send the msg
-        if (isSending) {
+        if (isSending)
+        {
             //printf("Es turno del productor: %d y yo soy %d\n", buffer->next_producer, self_id);
             // If its out turn to send
-            if (buffer->next_producer == self_id) {
+            if (buffer->next_producer == self_id)
+            {
                 // Get the date and time 
                 char date_n_time[DNT_LEN];
                 get_date(date_n_time);
@@ -116,7 +120,8 @@ int main(int argc, char *argv[]) {
 
         }
         // If the buffer is down 
-        else {
+        else
+        {
             // Decrease the producer counter
             --buffer->producers;
             isSending = FALSE;
@@ -153,6 +158,7 @@ int main(int argc, char *argv[]) {
     printf("-----------------------------------------------------------\n");
     printf("-----------------------------------------------------------\n");
     printf("\033[0m");
+
 }
 
 

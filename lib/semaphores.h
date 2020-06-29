@@ -9,12 +9,13 @@
 #include "const.h"
 
 
-void get_semaphores(sem_t* semaphores, char* buffer_name){
-    
+void get_semaphores(sem_t* semaphores, char* buffer_name)
+{    
     // Allocate memory to make names uniques to each buffer
     char * s0 = (char *) malloc(1 + strlen(mutex) + BN_LEN);
     char * s1 = (char *) malloc(1 + strlen(empty) + BN_LEN);
     char * s2 = (char *) malloc(1 + strlen(available) + BN_LEN);
+
     // Concat the names
     strcpy(s0, buffer_name);
     strcat(s0, mutex);
@@ -33,21 +34,26 @@ void get_semaphores(sem_t* semaphores, char* buffer_name){
     semaphores[2] = *sem_open(s2, O_CREAT, semaphore_flags, 0);
 
     // Error handling
-    if (semaphores == SEM_FAILED) {
+    if (semaphores == SEM_FAILED)
+    {
         sem_close(semaphores);
         sem_close(semaphores + 1);
         sem_close(semaphores + 2);
         perror("Failed to open semphore for mutex");
         exit(EXIT_FAILURE);
     }
-    if ((semaphores + 1) == SEM_FAILED) {
+
+    if ((semaphores + 1) == SEM_FAILED)
+    {
         sem_close(semaphores);
         sem_close(semaphores + 1);
         sem_close(semaphores + 2);
         perror("Failed to open semphore for empty");
         exit(EXIT_FAILURE);
     }
-    if ((semaphores + 2) == SEM_FAILED) {
+
+    if ((semaphores + 2) == SEM_FAILED)
+    {
         sem_close(semaphores);
         sem_close(semaphores + 1);
         sem_close(semaphores + 2);

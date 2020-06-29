@@ -9,27 +9,38 @@
 #include <limits.h>
 
 
-int expo_distribution(double lambda) {
+/**
+ * This function computes a random number using an exponential distribution.
+ * 
+ * Params
+ *     - double lamb: mean in seconds.
+ */
+int expo_distribution(double lambda)
+{
     double u = rand() / (RAND_MAX + 1.0);
     return (int)(lambda * -log(1.0 - u));
 }
 
-/* poisson.c
+/** 
+ * poisson.c
  *
  * Implementation straight from 
  * http://en.wikipedia.org/wiki/Poisson_distribution#Generating_Poisson-distributed_random_variables
  * which credits Knuth.
  *
  * Time complexity is O(lambda), which is not optimal.
-*/
-int poisson_distribution(double lambda) {
+ */
+int poisson_distribution(double lambda)
+{
     int k = 0;
     double L = exp(-lambda), p = 1;
 
-    do {
+    do
+    {
         ++k;
         p *= random() / (double) INT_MAX;
-    } while (p > L);
+    }
+    while (p > L);
 
     return --k;
 }

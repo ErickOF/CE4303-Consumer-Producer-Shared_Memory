@@ -14,7 +14,8 @@
 
 
 
-int usr_input(){
+int usr_input()
+{
 
     int ch;
     struct termios oldt, newt;
@@ -90,7 +91,8 @@ int main(int argc, char *argv[])
     double time = poisson_distribution(*(parameters + 1));
 
     // Only send when the buffer is active
-    while (isRecieving) {
+    while (isRecieving)
+    {
         // Get waiting time
         int waiting_time = poisson_distribution((double)* (parameters + 1));
         //printf("Esperando: %d\n", waiting_time);
@@ -124,16 +126,19 @@ int main(int argc, char *argv[])
         isRecieving = buffer->isActive;
 
         // If it is recieving
-        if (isRecieving) {
+        if (isRecieving)
+        {
 
             //printf("Es turno del consumidor: %d y yo soy %d\n", buffer->next_consumer, self_id);
             // If its out turn to recieve
-            if (buffer->next_consumer == self_id) {
+            if (buffer->next_consumer == self_id)
+            {
                 // Start time
                 get_mstime(&start);
 
                 // if we are on manual mode
-                if (*(parameters + 2) == FALSE) {
+                if (*(parameters + 2) == FALSE)
+                {
                     printf("Press enter to recieve a msg \n");
                     usr_input();
                 }
@@ -153,7 +158,8 @@ int main(int argc, char *argv[])
                 ++num_messages;
 
                 // if the data is equal to our id modulus 6
-                if(data == pid_mod){
+                if (data == pid_mod)
+                {
                     // Then stop consuming msgs
                     isRecieving = FALSE;
                     // Decrease the producer counter
@@ -166,7 +172,8 @@ int main(int argc, char *argv[])
             }
         }
         // If the buffer is down 
-        else {
+        else
+        {
             // Decrease the producer counter
             --(buffer->consumers);
             printf("-----------------------------------------------------------\n");

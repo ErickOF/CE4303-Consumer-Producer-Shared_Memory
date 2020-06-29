@@ -15,7 +15,8 @@
  * Params:
  *     char date - var to store datetime.
  */
-void get_date(char date_n_time[DNT_LEN]){
+void get_date(char date_n_time[DNT_LEN])
+{
 	time_t t = time(NULL);
 	struct tm *tm = localtime(&t);
     strftime(date_n_time, DNT_LEN - 1, "%Y-%m-%d %H:%M:%S", tm);
@@ -27,7 +28,8 @@ void get_date(char date_n_time[DNT_LEN]){
  * Params:
  *     struct timeval vale - var to store time of date.
  */
-void get_mstime(struct timeval *value) {
+void get_mstime(struct timeval *value)
+{
 	gettimeofday(value, NULL);
 }
 

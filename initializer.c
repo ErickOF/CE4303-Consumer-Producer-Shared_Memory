@@ -6,7 +6,8 @@
 #include "lib/const.h"
 
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     char buffer_name[BN_LEN]; 
     int shmid = *parse_initializer(argc, argv, buffer_name);
 
@@ -16,7 +17,8 @@ int main(int argc, char* argv[]) {
     // https://www.mkssoftware.com/docs/man3/shmat.3.asp
     buffer_t* buffer = (buffer_t*) shmat(shmid, NULL, 0);
 
-    if (buffer == (void *) -1) {
+    if (buffer == (void *) -1)
+    {
         printf("Error: Shared memory attach");
         exit(1);
     }
@@ -26,17 +28,22 @@ int main(int argc, char* argv[]) {
     // Set values
     // Set buffer name
     strcpy(buffer->name, buffer_name);
+
     // Initialize consumer, producer id values and consumer turn 
     buffer->consumers = 0;
     buffer->producers = 0;
     buffer->next_consumer = 0;
     buffer->next_producer = 0;
+
     // Set system active
     buffer->isActive = 1;
     // Initialize msg related arrays
-    for(size_t i = 0; i < MAX_MSGS; i++){
+
+    for (size_t i = 0; i < MAX_MSGS; i++)
+    {
         buffer->available_slots[i] = FALSE;
     }
+
     // Initialize semaphores
     get_semaphores(buffer->semaphores, buffer_name);
 

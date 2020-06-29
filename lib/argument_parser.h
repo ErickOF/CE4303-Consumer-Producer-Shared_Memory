@@ -9,7 +9,8 @@
 #include "shared_memory.h"
 
 
-int* parse_initializer(int argc, char *argv[], char* b_name){
+int* parse_initializer(int argc, char *argv[], char* b_name)
+{
     // buffer name, buffer size, 
     int valid_arguments[2] = {0, 0};
     // [0] is shared memory id and [1] is buffer size
@@ -21,12 +22,14 @@ int* parse_initializer(int argc, char *argv[], char* b_name){
 
 	// Checking if number of argument is 
 	// equal to 4 or not. 
-	if (argc != 5) { 
+	if (argc != 5)
+    {
 		printf("Please enter only the buffer name and buffer size. \nExample: initializer -bn <buffer_name> -bs <buffer_size>\n"); 
 		exit(EXIT_FAILURE); 
 	} 
 
-    for (int i = 0; i < argc; ++i) {
+    for (int i = 0; i < argc; ++i)
+    {
         // If we recive the buffer name
         if (strcmp(argv[i], "-bn") == 0) {
             strcpy(buffer_name, argv[i + 1]);
@@ -34,12 +37,15 @@ int* parse_initializer(int argc, char *argv[], char* b_name){
             valid_arguments[0] = 1;
         }
         // If we recive the avg message time
-        else if(strcmp(argv[i], "-bs") == 0) {
+        else if(strcmp(argv[i], "-bs") == 0)
+        {
             // Validate number
             int j = 0;
 
-            while (argv[i + 1][j] != '\0') {
-                if (!isdigit(argv[i + 1][j])) {
+            while (argv[i + 1][j] != '\0')
+            {
+                if (!isdigit(argv[i + 1][j]))
+                {
                     printf("Buffer size must be a number.\n"); 
                     exit(EXIT_FAILURE);
                 }
@@ -54,13 +60,18 @@ int* parse_initializer(int argc, char *argv[], char* b_name){
     }
 
     // Check we read all the values 
-    if (valid_arguments[0] == 0) {
+    if (valid_arguments[0] == 0)
+    {
         printf("Missing buffer name\n"); 
         exit(EXIT_FAILURE);
-    } else if (valid_arguments[1] == -1) {
+    }
+    else if (valid_arguments[1] == -1)
+    {
         printf("Missing buffer size\n");
         exit(EXIT_FAILURE);
-    } else {
+    }
+    else
+    {
         // Get the associated shared memory id
         *values = get_shared_mem_id(buffer_name, IPC_CREAT | IPC_EXCL);
     }
@@ -72,12 +83,13 @@ int* parse_initializer(int argc, char *argv[], char* b_name){
 }
 
 
-int* parse_producer(int argc, char *argv[]){
+int* parse_producer(int argc, char *argv[])
+{
 
-    //                      buffer name, avg seconds
-    int valid_arguments[2] = {0         ,      0};
+    // buffer name, avg seconds
+    int valid_arguments[2] = {0 , 0};
     // [0] is buffer id and [1] is avg seconds
-    int* values = (int*)malloc(2 * sizeof(int)); 
+    int* values = (int*) malloc(2 * sizeof(int)); 
     *values = -1;
     *(values + 1) = -1;
 
@@ -92,9 +104,11 @@ int* parse_producer(int argc, char *argv[]){
     for (int i = 0; i < argc; ++i)
     {
         // If we recive the buffer name
-        if(strcmp(argv[i], "-bn") == 0){
+        if (strcmp(argv[i], "-bn") == 0)
+        {
             // And we havent recieved it
-            if(valid_arguments[0] == 0){
+            if (valid_arguments[0] == 0)
+            {
                 // Get the associated shared memory id
                 *values = get_shared_mem_id(argv[i+1], 0);
                 valid_arguments[0] = 1;
@@ -108,9 +122,11 @@ int* parse_producer(int argc, char *argv[]){
             
         }
         // If we recive the avg message time
-        else if(strcmp(argv[i], "-ti") == 0){
+        else if(strcmp(argv[i], "-ti") == 0)
+        {
             // And we havent recieved it
-            if(valid_arguments[1] == 0){
+            if(valid_arguments[1] == 0)
+            {
                 // Store it
                 *(values + 1) = atoi(argv[i+1]);
                 valid_arguments[1] = 1;
@@ -125,11 +141,13 @@ int* parse_producer(int argc, char *argv[]){
     }
 
     // Check we read all the values 
-    if(*values == -1){
+    if (*values == -1)
+    {
         printf("Missing buffer name\n"); 
         exit(EXIT_FAILURE);
     } 
-    if(*(values + 1) == -1){
+    else if (*(values + 1) == -1)
+    {
         printf("Missing average time\n"); 
         exit(EXIT_FAILURE);
     }
@@ -139,7 +157,8 @@ int* parse_producer(int argc, char *argv[]){
 }
 
 
-int* parse_consumer(int argc, char *argv[]){
+int* parse_consumer(int argc, char *argv[])
+{
     // buffer name, avg seconds, access mode
     int valid_arguments[3] = {0 , 0, 0};
     // [0] is buffer id, [1] is avg seconds, [2] access mode
@@ -159,9 +178,11 @@ int* parse_consumer(int argc, char *argv[]){
     for (int i = 0; i < argc; ++i)
     {
         // If we recive the buffer name
-        if(strcmp(argv[i], "-bn") == 0){
+        if(strcmp(argv[i], "-bn") == 0)
+        {
             // And we havent recieved it
-            if(valid_arguments[0] == 0){
+            if(valid_arguments[0] == 0)
+            {
                 // Get the associated shared memory id
                 *values = get_shared_mem_id(argv[i+1], 0);
                 valid_arguments[0] = 1;
@@ -174,9 +195,11 @@ int* parse_consumer(int argc, char *argv[]){
             
         }
         // If we recive the avg message time
-        else if(strcmp(argv[i], "-ti") == 0){
+        else if(strcmp(argv[i], "-ti") == 0)
+        {
             // And we havent recieved it
-            if(valid_arguments[1] == 0){
+            if(valid_arguments[1] == 0)
+            {
                 // Store it
                 *(values + 1) = atoi(argv[i+1]);
                 valid_arguments[1] = 1;
@@ -189,7 +212,8 @@ int* parse_consumer(int argc, char *argv[]){
             
         }
         // If we recive the access mode
-        else if(strcmp(argv[i], "-am") == 0){
+        else if(strcmp(argv[i], "-am") == 0)
+        {
             // And we havent recieved it
             if(valid_arguments[2] == 0){
                 // Store it
@@ -206,15 +230,18 @@ int* parse_consumer(int argc, char *argv[]){
     }
     
     // Check we read all the values 
-    if(*values == -1){
+    if(*values == -1)
+    {
         printf("Missing buffer name\n"); 
         exit(EXIT_FAILURE);
     } 
-    if(*(values + 1) == -1){
+    else if(*(values + 1) == -1)
+    {
         printf("Missing average time\n"); 
         exit(EXIT_FAILURE);
     }
-    if(*(values + 2) == -1){
+    else if(*(values + 2) == -1)
+    {
         printf("Missing accses mode\n"); 
         exit(EXIT_FAILURE);
     }
@@ -223,7 +250,8 @@ int* parse_consumer(int argc, char *argv[]){
 
 }
 
-int* parse_killer(int argc, char *argv[]){
+int* parse_killer(int argc, char *argv[])
+{
     // buffer name
     int valid_arguments = 0;
     // [0] is buffer id 
@@ -232,16 +260,20 @@ int* parse_killer(int argc, char *argv[]){
 
 	// Checking if number of argument is 
 	// equal to 3 or not. 
-	if (argc != 3) { 
+	if (argc != 3)
+    {
 		printf("Please enter only the buffer name. \nExample: killer -bn <buffer_name>\n");
 		return 0; 
 	} 
 
-    for (int i = 0; i < argc; ++i) {
+    for (int i = 0; i < argc; ++i)
+    {
         // If we recive the buffer name
-        if (strcmp(argv[i], "-bn") == 0) {
+        if (strcmp(argv[i], "-bn") == 0)
+        {
             // And we havent recieved it
-            if (valid_arguments == 0) {
+            if (valid_arguments == 0)
+            {
                 // Get the associated shared memory id
                 *values = get_shared_mem_id(argv[i + 1], 0);
                 valid_arguments = 1;
@@ -250,7 +282,8 @@ int* parse_killer(int argc, char *argv[]){
     }
 
     // Check we read all the values 
-    if (valid_arguments == 0){
+    if (valid_arguments == 0)
+    {
         printf("Missing buffer name\n"); 
         exit(EXIT_FAILURE);
     }

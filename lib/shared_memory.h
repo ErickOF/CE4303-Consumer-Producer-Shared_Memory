@@ -32,7 +32,7 @@ extern int errno;
  * int date - sent date of the msg.
  * int time - time the msg was sent.
  */
-typedef struct Message{
+typedef struct Message {
     short producer_id;
     int data;
     char date_n_time[DNT_LEN];
@@ -61,7 +61,7 @@ typedef struct Message{
  * message_t msg              - array that contains the msgs sent by the
  *                              producers, has size MAX_MSGS.
  */
-typedef struct Buffer{
+typedef struct Buffer {
     char name[BN_LEN];
     short consumers;
     short producers;
@@ -96,7 +96,8 @@ int generate_uid(const char* s) {
     int h = 0;
     const int size = strlen(s);
 
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++)
+    {
         h = 31 * h + *(s + i);
     }
 
@@ -124,10 +125,13 @@ int get_shared_mem_id(const char* buffer_name, int flag){
     int shmid = shmget(key, sizeof(buffer_t), buffer_flags | flag);
 
     // Check for errors
-    if (errno == EEXIST) {
+    if (errno == EEXIST)
+    {
         printf("Error: Buffer '%s' already exist.\n", buffer_name);
         exit(1);
-    } else if (shmid == -1) {
+    }
+    else if (shmid == -1)
+    {
         printf("Error: Buffer '%s' doesn't exist.\n", buffer_name);
         exit(1);
     }
@@ -146,7 +150,8 @@ int get_shared_mem_id(const char* buffer_name, int flag){
  * Returns
  *      buffer_t* shared memory buffer structure.
  */
-buffer_t* attach_shm(int shmid){
+buffer_t* attach_shm(int shmid)
+{
     // Attaches the shared memory segment associated with the shared
     // memory identifier shmid to the data segment of the calling
     // process.
@@ -154,7 +159,8 @@ buffer_t* attach_shm(int shmid){
     buffer_t* buffer = (buffer_t*) shmat(shmid, NULL, 0);
 
     // Check for errors
-    if (buffer == (buffer_t*)-1) {
+    if (buffer == (buffer_t*)-1)
+    {
         perror("Failed shmat attempt \n"); 
         exit(EXIT_FAILURE);
     }
@@ -171,7 +177,8 @@ buffer_t* attach_shm(int shmid){
  *      int target_value - value we look for in the available slots array
  * 
  */
-int search_target(buffer_t* buffer, int target_value){
+int search_target(buffer_t* buffer, int target_value)
+{
 
     // Index of the msg
     int i;    
@@ -181,7 +188,8 @@ int search_target(buffer_t* buffer, int target_value){
     {
         // Check if the slot is equal to the target
         // TRUE is full and FALSE is empty
-        if(buffer->available_slots[i] == target_value){
+        if (buffer->available_slots[i] == target_value)
+        {
             return i;
         }
     }
@@ -205,12 +213,14 @@ void send_msg(message_t msg, buffer_t* buffer){
     
 
     // Check for errors
-    if (idx == -1) {
+    if (idx == -1)
+    {
         printf("send msg failed");
         exit(EXIT_FAILURE);
     }  
     // If everything is ok then send the message and print the success notification
-    else {
+    else
+    {
 
         // Assign the new msg
         buffer->msg[idx] = msg;
@@ -232,20 +242,22 @@ void send_msg(message_t msg, buffer_t* buffer){
 }
 
 
-int receive_msg(buffer_t* buffer){
+int receive_msg(buffer_t* buffer)
+{
     // msg
     message_t* message;
     // Search for an empty space in the available slots
     int idx = search_target(buffer, TRUE);
 
     // Check for errors
-    if (idx == -1) {
+    if (idx == -1)
+    {
         perror("msg reception failed");
         exit(EXIT_FAILURE);
     }  
     // If everything is ok then send the message and print the success notification
-    else {
-
+    else
+    {
         // Extract the ptr to the msg slot
         message = (buffer->msg + idx);
         // Set the slot as empty

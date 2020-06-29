@@ -18,7 +18,8 @@
 #include "lib/datetime.h"
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     int shmid = *parse_killer(argc, argv);
 
     // Attaches the shared memory segment associated with the shared
@@ -32,11 +33,13 @@ int main(int argc, char *argv[]) {
     sem_wait(buffer->semaphores);
     // Send the kill signal 
     buffer->isActive = FALSE;
+
     // Post in case there are consumers waiting 
     for (size_t i = 0; i < buffer->consumers; i++)
     {
         sem_post(buffer->semaphores + 2);
     }
+
     // Post in case there are producers waiting 
     for (size_t i = 0; i < buffer->producers; i++)
     {
@@ -59,7 +62,7 @@ int main(int argc, char *argv[]) {
     // Free the mutex
     sem_post(buffer->semaphores);
 
-	sleep(10);
+	sleep(5);
 
 
     // Kill semaphores
@@ -78,7 +81,8 @@ int main(int argc, char *argv[]) {
     // Unread messages
     int unread = 0;
 
-    for (int i = 0; i < MAX_MSGS; i++) {
+    for (int i = 0; i < MAX_MSGS; i++)
+    {
         unread += buffer->available_slots[i];
     }
     
@@ -95,7 +99,8 @@ int main(int argc, char *argv[]) {
     printf("Total de consumidores: %d\n", buffer->total_consumers);
     printf("Consumidores eliminados por llave:\n");
 
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 6; i++)
+    {
         printf("----> Llave [%d]: %d\n", i, buffer->deleted_consumers[i]);
     }
 
