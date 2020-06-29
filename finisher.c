@@ -41,6 +41,19 @@ int main(int argc, char *argv[]) {
     {
         sem_post(buffer->semaphores + 1);
     }
+
+    // Allocate memory to make names uniques to each buffer
+    char * s0 = (char *) malloc(1 + strlen(mutex) + BN_LEN);
+    char * s1 = (char *) malloc(1 + strlen(empty) + BN_LEN);
+    char * s2 = (char *) malloc(1 + strlen(available) + BN_LEN);
+
+    // Concat the names
+    strcpy(s0, buffer->name);
+    strcat(s0, mutex);
+    strcpy(s1, buffer->name);
+    strcat(s1, empty);
+    strcpy(s2, buffer->name);
+    strcat(s2, available);
     
     // Free the mutex
     sem_post(buffer->semaphores);
@@ -52,9 +65,14 @@ int main(int argc, char *argv[]) {
     sem_close(buffer->semaphores);
     sem_close(buffer->semaphores + 1);
     sem_close(buffer->semaphores + 2);
-    sem_unlink(mutex);
-    sem_unlink(empty);
-    sem_unlink(available);
+    sem_unlink(s0);
+    sem_unlink(s1);
+    sem_unlink(s2);
+
+    // Free the memory 
+    free(s0);
+    free(s1);
+    free(s2);
 
     // Detach and destroy shared memory for buffer
     shmdt(buffer);

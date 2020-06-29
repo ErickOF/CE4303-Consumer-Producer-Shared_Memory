@@ -35,7 +35,7 @@ extern int errno;
 typedef struct Message{
     short producer_id;
     int data;
-    char date_n_time[25];
+    char date_n_time[DNT_LEN];
 } message_t;
 
 
@@ -51,6 +51,7 @@ typedef struct Message{
  * message_t msg - array that contains the msgs sent by the producers, has size MAX_MSGS.
  */
 typedef struct Buffer{
+    char name[BN_LEN];
     short consumers;
     short producers;
     short next_consumer;
@@ -74,7 +75,7 @@ typedef struct Buffer{
  */
 int generate_uid(const char* s) {
     int h = 0;
-    const int size = sizeof(s) / sizeof(char);
+    const int size = strlen(s);
 
     for (int i = 0; i < size; i++) {
         h = 31 * h + *(s + i);

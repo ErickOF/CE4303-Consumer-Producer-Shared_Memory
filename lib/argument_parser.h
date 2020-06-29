@@ -9,7 +9,7 @@
 #include "shared_memory.h"
 
 
-int* parse_initializer(int argc, char *argv[]){
+int* parse_initializer(int argc, char *argv[], char* b_name){
     // buffer name, buffer size, 
     int valid_arguments[2] = {0, 0};
     // [0] is shared memory id and [1] is buffer size
@@ -17,7 +17,7 @@ int* parse_initializer(int argc, char *argv[]){
     *values = -1;
     *(values + 1) = -1;
 
-    char* buffer_name = (char*) calloc(64, sizeof(char));
+    char* buffer_name = (char*) calloc(BN_LEN, sizeof(char));
 
 	// Checking if number of argument is 
 	// equal to 4 or not. 
@@ -30,6 +30,7 @@ int* parse_initializer(int argc, char *argv[]){
         // If we recive the buffer name
         if (strcmp(argv[i], "-bn") == 0) {
             strcpy(buffer_name, argv[i + 1]);
+            strcpy(b_name, argv[i + 1]);
             valid_arguments[0] = 1;
         }
         // If we recive the avg message time

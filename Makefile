@@ -11,6 +11,7 @@ DEFAULT_BTIME=3
 BUILD_DIR=bin
 
 BUFFER_NAME=test_buffer
+BN=test_buffer2
 BUFFER_SIZE=1024
 
 
@@ -24,51 +25,59 @@ build:
 	@gcc -o ${BUILD_DIR}/$(CONSUMER).out $(CONSUMER).c $(SEMFLAGS)
 
 
-test-default-init:
-	@echo "Creating Buffer"
-	@${BUILD_DIR}/${INITIALIZER}.out -bn ${DEFAULT_BNAME} -bs ${DEFAULT_BSIZE}
-
-test-default-producer:
-	@echo "Producer"
-	@${BUILD_DIR}/${PRODUCER}.out -bn ${DEFAULT_BNAME} -ti ${DEFAULT_BTIME}
-
-test-default-consumer:
-	@echo "Consumer"
-	@${BUILD_DIR}/${CONSUMER}.out -bn ${DEFAULT_BNAME} -ti ${DEFAULT_BTIME}
-
-test-default-killer:
-	@echo "Finisher"
-	@${BUILD_DIR}/${FINISHER}.out -bn ${DEFAULT_BNAME}
 
 
-create_buffer:
+test_buffer1:
 	@gcc -o ${BUILD_DIR}/$(INITIALIZER).out $(INITIALIZER).c $(SEMFLAGS)
 	@echo "Creating Buffer <${BUFFER_NAME}> and size ${BUFFER_SIZE}"
 	@${BUILD_DIR}/${INITIALIZER}.out -bn ${BUFFER_NAME} -bs ${BUFFER_SIZE}
 
-create_producer:
+test_producer1:
 	@gcc -o ${BUILD_DIR}/$(PRODUCER).out $(PRODUCER).c $(SEMFLAGS)
 	@echo "Creating producer 0 with mean sleep of 3"
 	@${BUILD_DIR}/${PRODUCER}.out -bn ${BUFFER_NAME} -ti 3
 
-create_aconsumer:
+test_aconsumer1:
 	@gcc -o ${BUILD_DIR}/$(CONSUMER).out $(CONSUMER).c $(SEMFLAGS)
 	@echo "Creating consumer 0 with mean sleep of 4 and auto mode"
 	@${BUILD_DIR}/${CONSUMER}.out -bn ${BUFFER_NAME} -ti 4 -am 1
 
-create_mconsumer:
+test_mconsumer1:
 	@gcc -o ${BUILD_DIR}/$(CONSUMER).out $(CONSUMER).c $(SEMFLAGS)
 	@echo "Creating consumer 1 with mean sleep of 1 and manual mode"
 	@${BUILD_DIR}/${CONSUMER}.out -bn ${BUFFER_NAME} -ti 1 -am 0
 
-kill_buffer:
+kill_buffer1:
 	@gcc -o ${BUILD_DIR}/$(FINISHER).out $(FINISHER).c $(SEMFLAGS)
 	@echo "Killing <${BUFFER_NAME}> buffer"
 	@${BUILD_DIR}/${FINISHER}.out -bn ${BUFFER_NAME}
 
-restart_buffer:
-	@make kill_buffer
-	@make create_buffer
+
+test_buffer2:
+	@gcc -o ${BUILD_DIR}/$(INITIALIZER).out $(INITIALIZER).c $(SEMFLAGS)
+	@echo "Creating Buffer <${BN}> and size ${BUFFER_SIZE}"
+	@${BUILD_DIR}/${INITIALIZER}.out -bn ${BN} -bs ${BUFFER_SIZE}
+
+test_producer2:
+	@gcc -o ${BUILD_DIR}/$(PRODUCER).out $(PRODUCER).c $(SEMFLAGS)
+	@echo "Creating producer 0 with mean sleep of 3"
+	@${BUILD_DIR}/${PRODUCER}.out -bn ${BN} -ti 3
+
+test_aconsumer2:
+	@gcc -o ${BUILD_DIR}/$(CONSUMER).out $(CONSUMER).c $(SEMFLAGS)
+	@echo "Creating consumer 0 with mean sleep of 4 and auto mode"
+	@${BUILD_DIR}/${CONSUMER}.out -bn ${BN} -ti 4 -am 1
+
+test_mconsumer2:
+	@gcc -o ${BUILD_DIR}/$(CONSUMER).out $(CONSUMER).c $(SEMFLAGS)
+	@echo "Creating consumer 1 with mean sleep of 1 and manual mode"
+	@${BUILD_DIR}/${CONSUMER}.out -bn ${BN} -ti 1 -am 0
+
+kill_buffer2:
+	@gcc -o ${BUILD_DIR}/$(FINISHER).out $(FINISHER).c $(SEMFLAGS)
+	@echo "Killing <${BN}> buffer"
+	@${BUILD_DIR}/${FINISHER}.out -bn ${BN}
+
 
 
 clean:
