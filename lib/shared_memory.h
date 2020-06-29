@@ -42,17 +42,36 @@ typedef struct Message{
 /**
  * Struct Buffer is used to represent information needed.
  * 
- * short producers - number of producers using the buffer.
- * short consumers - number of consumers using the buffer.
- * short next_consumer - turn counter for consumer msg reception
- * short isActive - shared memory flag used to control system activity.
- * short available_slots - binary array that indexes available slots in 
- *                         the msg array, has size MAX_MSGS.
- * message_t msg - array that contains the msgs sent by the producers, has size MAX_MSGS.
+ * short producers            - number of producers using the buffer.
+ * short consumers            - number of consumers using the buffer.
+ * short total_consumers      - total number of consumers.
+ * short total_producers      - total number of producers.
+ * int total_msgs             - total number of messages.
+ * float total_waiting_time   - total time waiting by consumers and
+ *                              producers.
+ * float total_locked_time    - total time locked by semaphores.
+ * float total_user_time      - total time consumed by user.
+ * float total_kernel_time    - total time consumed in kernel.
+ * short deleted_consumers[6] - deleted consumers by key.
+ * short next_consumer        - turn counter for consumer msg reception.
+ * short isActive             - shared memory flag used to control system
+ *                              activity.
+ * short available_slots      - binary array that indexes available slots in
+ *                              the msg array, has size MAX_MSGS.
+ * message_t msg              - array that contains the msgs sent by the
+ *                              producers, has size MAX_MSGS.
  */
-typedef struct Buffer{
+typedef struct Buffer {
     short consumers;
     short producers;
+    short total_consumers;
+    short total_producers;
+    int total_msgs;
+    float total_waiting_time;
+    float total_locked_time;
+    float total_user_time;
+    float total_kernel_time;
+    short deleted_consumers[6];
     short next_consumer;
     short next_producer;
     short isActive;
