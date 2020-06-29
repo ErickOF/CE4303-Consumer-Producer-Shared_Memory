@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     // Free the mutex
     sem_post(buffer->semaphores);
 
-	sleep(5);
+	sleep(10);
 
 
     // Kill semaphores
@@ -75,6 +75,14 @@ int main(int argc, char *argv[]) {
     free(s1);
     free(s2);
 
+    // Unread messages
+    int unread = 0;
+
+    for (int i = 0; i < MAX_MSGS; i++) {
+        unread += buffer->available_slots[i];
+    }
+    
+
     // Statistics
     printf("\033[1m");
     printf("-----------------------------------------------------------\n");
@@ -82,13 +90,13 @@ int main(int argc, char *argv[]) {
     printf("-----------------------------------------------------------\n");
 
     printf("Mensajes totales: %d\n", buffer->total_msgs);
-    printf("Mensajes en el buffer: %d\n", buffer->total_msgs);
+    printf("Mensajes en el buffer: %d\n", unread);
     printf("Total de productores: %d\n", buffer->total_producers);
     printf("Total de consumidores: %d\n", buffer->total_consumers);
     printf("Consumidores eliminados por llave:\n");
 
     for (int i = 0; i < 6; i++) {
-        printf("----> Llave [%d]: %f\n", i, buffer->deleted_consumers[i]);
+        printf("----> Llave [%d]: %d\n", i, buffer->deleted_consumers[i]);
     }
 
     printf("Tiempo total esperando: %f\n", buffer->total_waiting_time);

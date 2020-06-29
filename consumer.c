@@ -37,7 +37,9 @@ int main(int argc, char *argv[])
     // [1]:avg time sleep in seconds 
     // [2] access mode
     int* parameters = parse_consumer(argc, argv);
-    int pid_mod = getpid() % 6;
+
+    int pid = getpid();
+    int pid_mod = pid % 6;
 
     // Statistics variables
     float total_locked_time = 0;
@@ -196,6 +198,7 @@ int main(int argc, char *argv[])
     printf("----------------- Consumidor %d finalizado ----------------\n", self_id);
     printf("-----------------------------------------------------------\n");
 
+    printf("PID: %d\n", pid);
     printf("Mensajes consumidos: %d\n", num_messages);
     printf("Tiempo total esperando: %f\n", total_waiting_time);
     printf("Tiempo total bloqueado: %f\n", total_locked_time);
