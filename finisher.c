@@ -68,7 +68,11 @@ int main(int argc, char *argv[]) {
     printf("Total de productores: %d\n", buffer->total_producers);
     printf("Total de consumidores: %d\n", buffer->total_consumers);
     printf("Consumidores eliminados por llave:\n");
-    //
+
+    for (int i = 0; i < 6; i++) {
+        printf("----> Llave [%d]: %f\n", i, buffer->deleted_consumers[i]);
+    }
+
     printf("Tiempo total esperando: %f\n", buffer->total_waiting_time);
     printf("Tiempo total bloqueado: %f\n", buffer->total_locked_time);
     printf("Tiempo total de usuario: %f\n", buffer->total_user_time);
