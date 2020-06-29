@@ -9,7 +9,7 @@
 
 #include "lib/argument_parser.h"
 #include "lib/semaphores.h"
-#include "lib/random_number_genarator.h"
+#include "lib/random_number_generator.h"
 
 
 /**
@@ -59,37 +59,38 @@ int main(int argc, char *argv[])
     // Only send when the buffer is active
     while(isSending){
 
+        //printf("Esperando empty\n");
         // Wait for empty spaces
         sem_wait(buffer->semaphores + 1);
         // Wait for mutex
+        //printf("Esperando mutex\n");
         sem_wait(buffer->semaphores);
-
-        int b;
-        sem_getvalue(buffer->semaphores + 1 , &b);
-        printf("%d\n", b);
 
         //Check if the buffer is still active
         isSending = buffer->isActive;
 
         // If it is then send the msg
         if(isSending){
+
+            //printf("Es turno del productor: %d y yo soy %d\n", buffer->next_producer, self_id);
+
+            // If its out turn to send
+            if(buffer->next_producer == self_id){
     
-            // Get the date and time 
-            char date_n_time[DNT_LEN];
-            get_date(date_n_time);
-            // Create msg
-            message_t msg = {
-                .producer_id=self_id, 
-                .data=(rand() % 7), 
-                .date_n_time=date_n_time
-            };
+                // Get the date and time 
+                char date_n_time[DNT_LEN];
+                get_date(date_n_time);
+                // Create msg
+                message_t msg = {.producer_id=self_id, 
+                                .data=(rand() % 7)};
 
-            strcpy(msg.date_n_time, date_n_time);
+                strcpy(msg.date_n_time, date_n_time);
 
-            // Send the msg
-            send_msg(msg, buffer);
-            // Increment the counter
-            ++num_messages;
+                // Send the msg
+                send_msg(msg, buffer);
+                // Increment the counter
+                ++num_messages;
+            }
 
         }
         // If the buffer is down 
@@ -104,10 +105,21 @@ int main(int argc, char *argv[])
         // Update available
         sem_post(buffer->semaphores + 2);
 
+        /*int a, b, c;
+        sem_getvalue(buffer->semaphores, &c);
+        printf("sem 0 ptr %p and value %i\n", buffer->semaphores, c);
+        sem_getvalue(buffer->semaphores + 1 , &b);
+        printf("sem 1 ptr %p and value %i\n", buffer->semaphores + 1, b);
+        sem_getvalue(buffer->semaphores + 2 , &a);
+        printf("sem 2 ptr %p and value %i\n", buffer->semaphores + 2, a);*/
+
         // Sleep time 
         sleep(expo_distribution( (double)*(parameters + 1) ));
 
     }
+    
+    // Detach from shared memory
+    shmdt(buffer);
 
     printf("\033[1m");
     printf("-----------------------------------------------------------\n");
@@ -120,11 +132,6 @@ int main(int argc, char *argv[])
     printf("-----------------------------------------------------------\n");
     printf("-----------------------------------------------------------\n");
     printf("\033[0m");
-    
-    // Detach from shared memory
-    shmdt(buffer);
-    // TODO HANDLE PRINTS OVER HERE
-    printf("Detached...\n");
 }
 
 #endif  // PROYECTO1_PRODUCER_H

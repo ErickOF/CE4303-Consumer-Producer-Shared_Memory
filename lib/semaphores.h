@@ -50,33 +50,5 @@ void get_semaphores(sem_t* semaphores){
 }
 
 
-int isValidSemaphore(sem_t* semaphores){
-
-    int a = -8;
-    int b = -8;
-    int c = -8;
-    int e;
-    e = sem_getvalue(semaphores, &a);
-    if(e ==-1){
-        perror("Error on sem 0");
-    }
-    printf("sem 0 ptr %p and value %i\n", semaphores, a);
-    e = sem_getvalue(semaphores + 1 , &b);
-    if(e ==-1){
-        perror("Error on sem 0");
-    }
-    printf("sem 1 ptr %p and value %i\n", semaphores + 1, b);
-    e = sem_getvalue(semaphores + 2, &c);
-    if(e ==-1){
-        perror("Error on sem 0");
-    }
-    printf("sem 2 ptr %p and value %i\n", semaphores + 2, c);
-
-    return a + b + c;
-}
-
-
-
-
 
 #endif  // PROYECTO1_SEMAPHORES_H

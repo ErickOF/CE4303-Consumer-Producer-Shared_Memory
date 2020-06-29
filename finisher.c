@@ -10,10 +10,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <unistd.h>
 
 #include "lib/shared_memory.h"
 #include "lib/argument_parser.h"
+#include "lib/const.h"
 
 
 int main(int argc, char *argv[]) {
@@ -27,16 +28,33 @@ int main(int argc, char *argv[]) {
 
 
     // Acces number of producers
-    //sem_wait(buffer->semaphores);
+    sem_wait(buffer->semaphores);
     // Send the kill signal 
     buffer->isActive = FALSE;
+    // Post in case there are consumers waiting 
+    for (size_t i = 0; i < buffer->consumers; i++)
+    {
+        sem_post(buffer->semaphores + 2);
+    }
+    // Post in case there are producers waiting 
+    for (size_t i = 0; i < buffer->producers; i++)
+    {
+        sem_post(buffer->semaphores + 1);
+    }
+    
     // Free the mutex
-    //sem_post(buffer->semaphores);
+    sem_post(buffer->semaphores);
 
-	//sleep(5);
+	sleep(5);
 
 
-    // TODO: HANDLE SEMAPHORES
+    // Kill semaphores
+    sem_close(buffer->semaphores);
+    sem_close(buffer->semaphores + 1);
+    sem_close(buffer->semaphores + 2);
+    sem_unlink(mutex);
+    sem_unlink(empty);
+    sem_unlink(available);
 
     // Detach and destroy shared memory for buffer
     shmdt(buffer);

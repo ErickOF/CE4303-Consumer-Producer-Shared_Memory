@@ -54,6 +54,7 @@ typedef struct Buffer{
     short consumers;
     short producers;
     short next_consumer;
+    short next_producer;
     short isActive;
     sem_t semaphores[3];
     short available_slots[MAX_MSGS];
@@ -195,6 +196,8 @@ void send_msg(message_t msg, buffer_t* buffer){
         buffer->msg[idx] = msg;
         // Set the slot as full
         buffer->available_slots[idx] = TRUE;
+        // Update turn
+        buffer->next_producer = (++buffer->next_producer) % buffer->producers;
 
         // Print notifications
         printf("-----------------------------------------------------------\n");
@@ -213,7 +216,7 @@ int receive_msg(buffer_t* buffer){
     // msg
     message_t* message;
     // Search for an empty space in the available slots
-    int idx = search_target(buffer, FALSE);
+    int idx = search_target(buffer, TRUE);
 
     // Check for errors
     if (idx == -1) {
@@ -232,7 +235,10 @@ int receive_msg(buffer_t* buffer){
 
         // Print notifications
         printf("-----------------------------------------------------------\n");
-        printf("Mensaje recibido en la posicion %d con un valor de %d\n", idx, message->data);
+        printf("\033[1;34m");
+        printf("El siguiente mensaje fue recibido en la posicion %d.\n", idx);
+        printf("Productor: %d\tDatos %d\t Fecha y hora: %s\n", message->producer_id, message->data, message->date_n_time);
+        printf("\033[0m");
         printf("Productores activos: %d\n", buffer->producers);
         printf("Consumidores activos: %d\n", buffer->consumers);
         printf("-----------------------------------------------------------\n");

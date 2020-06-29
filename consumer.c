@@ -9,7 +9,7 @@
 
 #include "lib/argument_parser.h"
 #include "lib/semaphores.h"
-#include "lib/random_number_genarator.h"
+#include "lib/random_number_generator.h"
 
 
 
@@ -59,8 +59,15 @@ int main(int argc, char *argv[])
     self_id = buffer->consumers++;
     // Free the mutex
     sem_post(buffer->semaphores);
-    printf("Productores activos %d\n", buffer->producers);
-
+    
+    
+    int a, b, c;
+    /*sem_getvalue(buffer->semaphores, &c);
+    printf("sem 0 ptr %p and value %i\n", buffer->semaphores, c);
+    sem_getvalue(buffer->semaphores + 1 , &b);
+    printf("sem 1 ptr %p and value %i\n", buffer->semaphores + 1, b);
+    sem_getvalue(buffer->semaphores + 2 , &a);
+    printf("sem 2 ptr %p and value %i\n", buffer->semaphores + 2, a);*/
 
     // Initialize random lib
     srand((unsigned) time(NULL));
@@ -71,9 +78,11 @@ int main(int argc, char *argv[])
     // Only send when the buffer is active
     while (isRecieving) {
         
+        //printf("Esperando available\n");
         // Wait for full spaces
         sem_wait(buffer->semaphores + 2);
         // Wait for mutex
+        //printf("Esperando mutex\n");
         sem_wait(buffer->semaphores);
 
         //Check if the buffer is still active
@@ -81,6 +90,8 @@ int main(int argc, char *argv[])
 
         // If it is recieving
         if (isRecieving) {
+
+            //printf("Es turno del consumidor: %d y yo soy %d\n", buffer->next_consumer, self_id);
             // If its out turn to recieve
             if(buffer->next_consumer == self_id){
 
@@ -104,7 +115,6 @@ int main(int argc, char *argv[])
                     --(buffer->consumers);
                     printf("-----------------------------------------------------------\n");
                     printf("Detected msg equal to consumer id modulus 6, detaching consumer %d...\n", self_id);
-                
 
                 } 
             }
@@ -123,16 +133,35 @@ int main(int argc, char *argv[])
         // Update new empty space available
         sem_post(buffer->semaphores + 1);
 
+        
+        /*sem_getvalue(buffer->semaphores, &c);
+        printf("sem 0 ptr %p and value %i\n", buffer->semaphores, c);
+        sem_getvalue(buffer->semaphores + 1 , &b);
+        printf("sem 1 ptr %p and value %i\n", buffer->semaphores + 1, b);
+        sem_getvalue(buffer->semaphores + 2 , &a);
+        printf("sem 2 ptr %p and value %i\n", buffer->semaphores + 2, a);*/
+
         // Sleep time 
         sleep(poisson_distribution( (double)*(parameters + 1) ));
         
-
     }
+
     
     // Detach from shared memory
     shmdt(buffer);
-    // TODO HANDLE PRINTS OVER HERE
-    printf("Detached...\n");
+
+
+    printf("\033[1m");
+    printf("-----------------------------------------------------------\n");
+    printf("----------------- Consumidor %d finalizado ----------------\n", self_id);
+    printf("-----------------------------------------------------------\n");
+    printf("\033[0m");
+
+    printf("\033[1m");
+    printf("-----------------------------------------------------------\n");
+    printf("-----------------------------------------------------------\n");
+    printf("-----------------------------------------------------------\n");
+    printf("\033[0m");
 } 
 
 #endif  // PROYECTO1_CONSUMER_H

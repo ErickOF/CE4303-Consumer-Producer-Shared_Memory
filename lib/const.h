@@ -10,7 +10,7 @@
 
 
 /*   SHARED MEMORY CONSTANTS   */
-#define MAX_MSGS 10
+#define MAX_MSGS 30
 const short buffer_flags = 0666;
 
 

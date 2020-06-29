@@ -26,6 +26,7 @@ int main(int argc, char* argv[]) {
     buffer->consumers = 0;
     buffer->producers = 0;
     buffer->next_consumer = 0;
+    buffer->next_producer = 0;
     // Set system active
     buffer->isActive = 1;
     // Initialize msg related arrays
