@@ -10,7 +10,7 @@
 #include "lib/argument_parser.h"
 #include "lib/semaphores.h"
 #include "lib/random_number_generator.h"
-
+#include "lib/datetime.h"
 
 
 
@@ -37,11 +37,16 @@ int main(int argc, char *argv[])
     // [1]:avg time sleep in seconds 
     // [2] access mode
     int* parameters = parse_consumer(argc, argv);
-    // Stats variables
+
+    // Statistics variables
+    float total_locked_time = 0;
+    float total_waiting_time = 0;
     unsigned int num_messages = 0;
+
     double acc_waiting_time = 0;
     double acc_sem_waiting_time = 0;
     double acc_user_time = 0;
+
     // Consumer control and identification
     short isRecieving = TRUE;
     short self_id;
@@ -72,21 +77,42 @@ int main(int argc, char *argv[])
     // Initialize random lib
     srand((unsigned) time(NULL));
 
+    // Time interval
+    struct timeval start, stop;
+
     // Get random time
     double time = poisson_distribution(*(parameters + 1));
 
     // Only send when the buffer is active
     while (isRecieving) {
+        // Get waiting time
+        int waiting_time = poisson_distribution((double)* (parameters + 1));
+        //printf("Esperando: %d\n", waiting_time);
 
-        // Sleep time 
-        sleep(poisson_distribution( (double)*(parameters + 1) ));
-        
+        // Sleep time
+        sleep(waiting_time);
+        // Total waiting time
+        total_waiting_time += (float) waiting_time;
+
+        // Start time
+        get_mstime(&start);
         //printf("Esperando available\n");
         // Wait for full spaces
         sem_wait(buffer->semaphores + 2);
         // Wait for mutex
         //printf("Esperando mutex\n");
         sem_wait(buffer->semaphores);
+        // End time
+        get_mstime(&stop);
+
+        // Total locked time
+        float locked_time = ((float)(stop.tv_usec - start.tv_usec)) / 1000000.0 + ((float)(stop.tv_sec - start.tv_sec));
+        total_locked_time += locked_time;
+
+        // Set statistics
+        buffer->total_waiting_time += (float) waiting_time;
+        buffer->total_locked_time += locked_time;
+        buffer->total_kernel_time += ((float) waiting_time) + locked_time;
 
         //Check if the buffer is still active
         isRecieving = buffer->isActive;
@@ -103,7 +129,6 @@ int main(int argc, char *argv[])
                     printf("Press enter to recieve a msg \n");
                     usr_input();
                 }
-                
 
                 // Recieve the msg data
                 data = receive_msg(buffer);
@@ -118,7 +143,6 @@ int main(int argc, char *argv[])
                     --(buffer->consumers);
                     printf("-----------------------------------------------------------\n");
                     printf("Detected msg equal to consumer id modulus 6, detaching consumer %d...\n", self_id);
-
                 } 
             }
         }
@@ -130,7 +154,6 @@ int main(int argc, char *argv[])
             printf("Detected inactive buffer, detaching consumer %d...\n", self_id);
         }
         
-
         // Release mutex
         sem_post(buffer->semaphores);
         // Update new empty space available
@@ -155,9 +178,12 @@ int main(int argc, char *argv[])
     printf("-----------------------------------------------------------\n");
     printf("----------------- Consumidor %d finalizado ----------------\n", self_id);
     printf("-----------------------------------------------------------\n");
-    printf("\033[0m");
 
-    printf("\033[1m");
+    printf("Mensajes consumidos: %d\n", num_messages);
+    printf("Tiempo total esperando: %f\n", total_waiting_time);
+    printf("Tiempo total bloqueado: %f\n", total_locked_time);
+    printf("Tiempo total en kernel: %f\n", (total_locked_time + total_waiting_time));
+
     printf("-----------------------------------------------------------\n");
     printf("-----------------------------------------------------------\n");
     printf("-----------------------------------------------------------\n");
