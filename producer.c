@@ -59,6 +59,9 @@ int main(int argc, char *argv[])
     // Only send when the buffer is active
     while(isSending){
 
+        // Sleep time 
+        sleep(expo_distribution( (double)*(parameters + 1) ));
+
         //printf("Esperando empty\n");
         // Wait for empty spaces
         sem_wait(buffer->semaphores + 1);
@@ -112,9 +115,6 @@ int main(int argc, char *argv[])
         printf("sem 1 ptr %p and value %i\n", buffer->semaphores + 1, b);
         sem_getvalue(buffer->semaphores + 2 , &a);
         printf("sem 2 ptr %p and value %i\n", buffer->semaphores + 2, a);*/
-
-        // Sleep time 
-        sleep(expo_distribution( (double)*(parameters + 1) ));
 
     }
     

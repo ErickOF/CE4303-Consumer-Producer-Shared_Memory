@@ -48,13 +48,18 @@ create_buffer:
 
 create_producer:
 	@gcc -o ${BUILD_DIR}/$(PRODUCER).out $(PRODUCER).c $(SEMFLAGS)
-	@echo "Creating producer 1 with mean sleep of 1"
+	@echo "Creating producer 0 with mean sleep of 3"
 	@${BUILD_DIR}/${PRODUCER}.out -bn ${BUFFER_NAME} -ti 3
 
-create_consumer:
+create_aconsumer:
+	@gcc -o ${BUILD_DIR}/$(CONSUMER).out $(CONSUMER).c $(SEMFLAGS)
+	@echo "Creating consumer 0 with mean sleep of 4 and auto mode"
+	@${BUILD_DIR}/${CONSUMER}.out -bn ${BUFFER_NAME} -ti 4 -am 1
+
+create_mconsumer:
 	@gcc -o ${BUILD_DIR}/$(CONSUMER).out $(CONSUMER).c $(SEMFLAGS)
 	@echo "Creating consumer 1 with mean sleep of 1 and manual mode"
-	@${BUILD_DIR}/${CONSUMER}.out -bn ${BUFFER_NAME} -ti 4 -am 1
+	@${BUILD_DIR}/${CONSUMER}.out -bn ${BUFFER_NAME} -ti 1 -am 0
 
 kill_buffer:
 	@gcc -o ${BUILD_DIR}/$(FINISHER).out $(FINISHER).c $(SEMFLAGS)
