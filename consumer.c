@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
     // Acces number of producers
     sem_wait(buffer->semaphores);
     self_id = buffer->consumers++;
+    buffer->total_consumers++;
     // Free the mutex
     sem_post(buffer->semaphores);
     
@@ -122,13 +123,24 @@ int main(int argc, char *argv[])
 
             //printf("Es turno del consumidor: %d y yo soy %d\n", buffer->next_consumer, self_id);
             // If its out turn to recieve
-            if(buffer->next_consumer == self_id){
+            if (buffer->next_consumer == self_id) {
+                // Start time
+                get_mstime(&start);
 
                 // if we are on manual mode
-                if(*(parameters + 2) == FALSE){
+                if (*(parameters + 2) == FALSE) {
                     printf("Press enter to recieve a msg \n");
                     usr_input();
                 }
+
+                // End time
+                get_mstime(&stop);
+
+                // Total user time
+                float user_time = ((float)(stop.tv_usec - start.tv_usec)) / 1000000.0 + ((float)(stop.tv_sec - start.tv_sec));
+                total_waiting_time += user_time;
+
+                buffer->total_user_time += user_time;
 
                 // Recieve the msg data
                 data = receive_msg(buffer);

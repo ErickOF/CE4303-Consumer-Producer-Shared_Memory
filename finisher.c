@@ -15,6 +15,7 @@
 #include "lib/shared_memory.h"
 #include "lib/argument_parser.h"
 #include "lib/const.h"
+#include "lib/datetime.h"
 
 
 int main(int argc, char *argv[]) {
@@ -56,11 +57,31 @@ int main(int argc, char *argv[]) {
     sem_unlink(empty);
     sem_unlink(available);
 
+    // Statistics
+    printf("\033[1m");
+    printf("-----------------------------------------------------------\n");
+    printf("-------------------- Buffer was deleted -------------------\n");
+    printf("-----------------------------------------------------------\n");
+
+    printf("Mensajes totales: %d\n", buffer->total_msgs);
+    printf("Mensajes en el buffer: %d\n", buffer->total_msgs);
+    printf("Total de productores: %d\n", buffer->total_producers);
+    printf("Total de consumidores: %d\n", buffer->total_consumers);
+    printf("Consumidores eliminados por llave:\n");
+    //
+    printf("Tiempo total esperando: %f\n", buffer->total_waiting_time);
+    printf("Tiempo total bloqueado: %f\n", buffer->total_locked_time);
+    printf("Tiempo total de usuario: %f\n", buffer->total_user_time);
+    printf("Tiempo total en kernel: %f\n", buffer->total_kernel_time);
+
+    printf("-----------------------------------------------------------\n");
+    printf("-----------------------------------------------------------\n");
+    printf("-----------------------------------------------------------\n");
+    printf("\033[0m");
+
     // Detach and destroy shared memory for buffer
     shmdt(buffer);
     shmctl(shmid, IPC_RMID, NULL);
-
-    printf("Buffer was deleted.\n");
 
     return 0; 
 }

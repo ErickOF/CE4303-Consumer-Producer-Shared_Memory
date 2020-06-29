@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
     // Acces number of producers
     sem_wait(buffer->semaphores);
     self_id = buffer->producers++;
+    buffer->total_producers++;
 
     // Free the mutex
     sem_post(buffer->semaphores);
